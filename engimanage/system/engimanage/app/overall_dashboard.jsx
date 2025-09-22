@@ -6,27 +6,25 @@ import {
   FlatList,
   ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import * as Progress from "react-native-progress";
 
+import DataSecureStorage from "../app/components/DataSecureStorage";
+import globalScript from "./globals/globalScript";
+
+const link = globalScript;
+
 const Overall_dashboard = () => {
   const [activeTab, setActiveTab] = useState("projects");
+  const [refreshingEmployees, setRefreshingEmployees] = useState(false);
+  const [refreshingProjects, setRefreshingProjects] = useState(false);
 
   // temp data for employee
-  const employees = [
-    { id: "1", name: "Alice", performance: "98%" },
-    { id: "2", name: "Bob", performance: "92%" },
-    { id: "3", name: "Charlie", performance: "88%" },
-    { id: "4", name: "David", performance: "80%" },
-    { id: "5", name: "Eve", performance: "76%" },
-    { id: "6", name: "Jonathan", performance: "74%" },
-    { id: "7", name: "James", performance: "69%" },
-    { id: "8", name: "Bryan", performance: "63%" },
-    { id: "9", name: "Peter", performance: "61%" },
-    { id: "10", name: "Joe", performance: "58%" },
-  ];
-  const yourRank = { rank: 4, name: "YOU", performance: "80%" };
+  const [employees, setemployee] = useState([]);
+  const [yourRank, setYourRank] = useState({});
+  const [yourPosition, setYourPosition] = useState("~");
+  const [userinfo, setUserinfo] = useState(null);
 
   const renderEmployeeRow = ({ item, index }) => {
     let bgColor = "#fff";
@@ -55,63 +53,13 @@ const Overall_dashboard = () => {
             {item.name} {medal && <Text>{medal}</Text>}
           </Text>
         </View>
-        <Text style={styles.empPerf}>⭐{item.performance}</Text>
+        <Text style={styles.empPerf}>
+          ⭐{item.performance ? item.performance : 0}%
+        </Text>
       </View>
     );
   };
-
-  // temp data for projects
-  const projects = [
-    {
-      id: "1",
-      name: "Engineering Dashboard",
-      progress: 90,
-      completed: 27,
-      uncompleted: 3,
-      tasks: [
-        { name: "Backend Setup", progress: 100 },
-        { name: "Frontend UI", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-        { name: "Testing", progress: 100 },
-      ],
-    },
-    {
-      id: "2",
-      name: "Livingstone HQ Renovation",
-      progress: 72,
-      completed: 18,
-      uncompleted: 7,
-      tasks: [
-        { name: "Structural Works", progress: 100 },
-        { name: "Interior Design", progress: 60 },
-        { name: "Electrical Setup", progress: 40 },
-        { name: "Electrical Setup", progress: 40 },
-        { name: "Electrical Setup", progress: 40 },
-        { name: "Electrical Setup", progress: 40 },
-        { name: "Electrical Setup", progress: 40 },
-        { name: "Electrical Setup", progress: 40 },
-      ],
-    },
-    {
-      id: "3",
-      name: "Client Portal System",
-      progress: 45,
-      completed: 9,
-      uncompleted: 11,
-      tasks: [
-        { name: "Auth Module", progress: 50 },
-        { name: "API Gateway", progress: 30 },
-        { name: "UI Development", progress: 20 },
-        { name: "Docs", progress: 10 },
-      ],
-    },
-  ];
+  const [projects, setProjects] = useState([]);
 
   const ProjectCard = ({ project }) => {
     const [expanded, setExpanded] = useState(false);
@@ -196,6 +144,81 @@ const Overall_dashboard = () => {
     );
   };
 
+  useEffect(() => {
+    getUserInfo();
+    get_taks_info();
+  }, []);
+
+  useEffect(() => {
+    if (userinfo && employees.length === 0) {
+      fetch_ranking_info();
+    }
+  }, [userinfo, employees]);
+
+  const getUserInfo = async () => {
+    const data = await DataSecureStorage.getItem("loginData");
+    if (data) {
+      const info = JSON.parse(data);
+      setUserinfo(info);
+    }
+  };
+
+  const fetch_ranking_info = async () => {
+    setRefreshingEmployees(true);
+    try {
+      const response = await fetch(`${link.api_link}/get_employee_ranking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setemployee(data.result);
+        setYourRank(data.result.find((a) => a.employee_id === userinfo.ID));
+        setYourPosition(
+          Number(data.result.findIndex((a) => a.employee_id === userinfo.ID)) +
+            1
+        );
+      } else {
+        console.log("no data");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setRefreshingEmployees(false);
+    }
+  };
+
+  const get_taks_info = async () => {
+    setRefreshingProjects(true);
+    try {
+      const response = await fetch(`${link.api_link}/get_projectRanking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        console.log(JSON.stringify(data.result));
+        setProjects(data.result);
+      } else {
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally{
+      setRefreshingProjects(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Toggle Switch */}
@@ -250,7 +273,7 @@ const Overall_dashboard = () => {
                 color="#C0C0C0"
                 style={{ marginTop: 5 }}
               />
-              <Text style={styles.podiumText}>Bob</Text>
+              <Text style={styles.podiumText}>{employees[1]?.name}</Text>
             </View>
             <View style={[styles.podiumBox, styles.podiumFirst]}>
               <Text style={styles.rankLabel}>1st</Text>
@@ -261,7 +284,7 @@ const Overall_dashboard = () => {
                 color="#FFD700"
                 style={{ marginTop: 5 }}
               />
-              <Text style={styles.podiumText}>Alice</Text>
+              <Text style={styles.podiumText}>{employees[0]?.name}</Text>
             </View>
             <View style={styles.podiumBox}>
               <Text style={styles.rankLabel}>3rd</Text>
@@ -272,7 +295,7 @@ const Overall_dashboard = () => {
                 color="#CD7F32"
                 style={{ marginTop: 5 }}
               />
-              <Text style={styles.podiumText}>Charlie</Text>
+              <Text style={styles.podiumText}>{employees[2]?.name}</Text>
             </View>
           </View>
           <FlatList
@@ -280,14 +303,40 @@ const Overall_dashboard = () => {
             keyExtractor={(item) => item.id}
             renderItem={renderEmployeeRow}
             contentContainerStyle={{ paddingBottom: 100, paddingTop: 15 }}
+            refreshing={refreshingEmployees}
+            onRefresh={fetch_ranking_info}
           />
+
           <View style={styles.yourRankBox}>
-            <Text style={{ fontWeight: "bold", fontSize: 16, color: "white" }}>
-              Rank {yourRank.rank} - {yourRank.name}
-            </Text>
-            <Text style={{ color: "white" }}>
-              Performance: ⭐{yourRank.performance}
-            </Text>
+            {yourRank ? (
+              <>
+                <Text
+                  style={{ fontWeight: "bold", fontSize: 16, color: "white" }}
+                >
+                  Rank: {yourPosition} - YOU
+                </Text>
+                <Text style={{ color: "white" }}>
+                  Performance: ⭐{yourRank?.performance}%
+                </Text>
+              </>
+            ) : (
+              <View style={styles.unranked}>
+                <Text
+                  style={{
+                    color: "#cb2121ff",
+                    fontWeight: "bold",
+                    fontSize: 18,
+                  }}
+                >
+                  UNRANKED
+                </Text>
+                <Text
+                  style={{ color: "white", fontWeight: "bold", fontSize: 13 }}
+                >
+                  "Keep Grinding"
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       )}
@@ -295,12 +344,14 @@ const Overall_dashboard = () => {
       {/* Projects */}
       {activeTab === "projects" && (
         <View style={{ flex: 1 }}>
-          <Text style={styles.sectionTitle}>📈 Top Performing Projects</Text>
+          <Text style={styles.sectionTitle}>Top Performing Projects</Text>
           <FlatList
             data={projects}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <ProjectCard project={item} />}
             contentContainerStyle={{ paddingBottom: 40 }}
+            refreshing={refreshingProjects}
+            onRefresh={get_taks_info}
           />
         </View>
       )}
@@ -371,7 +422,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
   },
-
+  unranked: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   // Projects
   projectCard: {
     backgroundColor: "#fff",

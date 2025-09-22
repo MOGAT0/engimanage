@@ -1097,7 +1097,9 @@ app.post('/api/updateTask', (req,res)=>{
           UPDATE
               tasks
           SET
-              progress = ?
+              progress = ?,
+              completion_date = CURDATE(),
+              completion_time = CURTIME()
           WHERE ID = ?
     `;
     db.query(query,[progress,id],(err,result)=>{
@@ -1356,7 +1358,6 @@ app.post('/api/getprojectinfo', (req,res)=>{
 })
 
 
-// delete members --------------------------------------------------------------------------------------
 // DELETE members --------------------------------------------------------------------------------------
 app.post('/api/deletemember', (req, res) => {
   const { memberID, projectID } = req.body;
@@ -2406,7 +2407,300 @@ app.post("/api/updateUser", (req, res) => {
   );
 });
 
+// employee performance evaluation ----------------------------------------------------------->
+app.post('/api/employee_evaluation', (req, res) => {
+  try {
+    const query = `
+      INSERT INTO employee_performance (employee_id, time_rate, completed_tasks, overdue_tasks, performance_rate)
+      SELECT 
+          employee_id,
+          SEC_TO_TIME(task_duration_seconds) AS time_rate,
+          completed_tasks,
+          overdue_tasks,
+          performance_rate
+      FROM (
+          SELECT 
+              at.assignedto AS employee_id,
+              AVG(TIMESTAMPDIFF(SECOND, 
+                  CONCAT(at.assigned_date, ' ', at.assigned_time), 
+                  CONCAT(t.completion_date, ' ', t.completion_time)
+              )) AS task_duration_seconds,
+              SUM(CASE WHEN t.progress = 100 OR t.assign_status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks,
+              SUM(CASE WHEN (t.progress < 100 OR t.assign_status = 'overdue') THEN 1 ELSE 0 END) AS overdue_tasks,
+              ROUND(
+                  (SUM(CASE WHEN t.progress = 100 OR t.assign_status = 'completed' THEN 1 ELSE 0 END) * 2) + 
+                  (100 / NULLIF(AVG(TIMESTAMPDIFF(SECOND, 
+                      CONCAT(at.assigned_date, ' ', at.assigned_time), 
+                      CONCAT(t.completion_date, ' ', t.completion_time)
+                  ))/3600, 0)) - 
+                  (SUM(CASE WHEN (t.progress < 100 OR t.assign_status = 'overdue') THEN 1 ELSE 0 END) * 1.5)
+              , 2) AS performance_rate
+          FROM assignedtasks at
+          JOIN tasks t ON at.task_id = t.ID
+          GROUP BY at.assignedto
+      ) perf
+      ON DUPLICATE KEY UPDATE
+        time_rate = VALUES(time_rate),
+        completed_tasks = VALUES(completed_tasks),
+        overdue_tasks = VALUES(overdue_tasks),
+        performance_rate = VALUES(performance_rate);
+    `;
 
+    db.query(query, (err, result) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: err });
+      }
+
+      res.json({ ok: true, message: "Employee evaluation upsert successful" });
+    });
+
+  } catch (error) {
+    res.status(500).json({ ok: false, message: error });
+  }
+});
+
+// app.post('/api/employee_evaluation',(req,res)=>{
+//   try {
+//    const query = `
+//       INSERT INTO employee_performance (employee_id, time_rate, completed_tasks, overdue_tasks, performance_rate)
+//       SELECT 
+//           employee_id,
+//           SEC_TO_TIME(task_duration_seconds) AS time_rate,
+//           completed_tasks,
+//           overdue_tasks,
+//           performance_rate
+//       FROM (
+//           SELECT 
+//               at.assignedto AS employee_id,
+//               AVG(TIMESTAMPDIFF(SECOND, 
+//                   CONCAT(at.assigned_date, ' ', at.assigned_time), 
+//                   CONCAT(t.completion_date, ' ', t.completion_time)
+//               )) AS task_duration_seconds,
+//               SUM(CASE WHEN t.progress = 100 OR t.assign_status = 'completed' THEN 1 ELSE 0 END) AS completed_tasks,
+//               SUM(CASE WHEN (t.progress < 100 OR t.assign_status = 'overdue') THEN 1 ELSE 0 END) AS overdue_tasks,
+//               ROUND(
+//                   (SUM(CASE WHEN t.progress = 100 OR t.assign_status = 'completed' THEN 1 ELSE 0 END) * 2) + 
+//                   (100 / NULLIF(AVG(TIMESTAMPDIFF(SECOND, 
+//                       CONCAT(at.assigned_date, ' ', at.assigned_time), 
+//                       CONCAT(t.completion_date, ' ', t.completion_time)
+//                   ))/3600, 0)) - 
+//                   (SUM(CASE WHEN (t.progress < 100 OR t.assign_status = 'overdue') THEN 1 ELSE 0 END) * 1.5)
+//               , 2) AS performance_rate
+//           FROM assignedtasks at
+//           JOIN tasks t ON at.task_id = t.ID
+//           GROUP BY at.assignedto
+//       ) perf;
+//    `;
+//    db.query(query,(err,result)=>{
+//       if(err){
+//         return res.status(500).json({ok:false,message:err})
+//       }
+
+//       res.json({ok:true,message:"employee evaluated successfully"})
+//    })
+  
+//   } catch (error) {
+//     res.status(500).json({ok:false,message:error})
+//   }
+// })
+
+// get employee ranking ------------------------------------------------------------->
+app.post('/api/get_employee_ranking',(req,res)=>{
+  try {
+    const query = `
+      SELECT
+          ep.*,
+          CONCAT(u.fname,' ',u.lname) AS name,
+          ep.performance_rate AS performance
+      FROM
+          employee_performance ep
+      LEFT JOIN users u ON u.ID = ep.employee_id
+      ORDER BY ep.performance_rate DESC
+    `;
+
+    db.query(query,(err,result)=>{
+      if(err){
+        return res.status(500).json({ok:false,message:err});
+      }
+      res.json({ok:true,message:"employee ranking",result})
+    })
+
+    
+  } catch (error) {
+    res.status(500).json({ok:false,message:error})
+  }
+})
+
+app.post('/api/get_projectRanking', (req, res) => {
+  try {
+    const query = `
+      SELECT 
+          t.projectID,
+          t.label AS task_label,
+          p.projectName AS project_name,
+          SUM(CASE WHEN t.assign_status = 'assigned' THEN 1 ELSE 0 END) AS assigned_count,
+          SUM(CASE WHEN t.assign_status = 'available' THEN 1 ELSE 0 END) AS available_count,
+          SUM(CASE WHEN t.progress = 100 THEN 1 ELSE 0 END) AS completed,
+          SUM(CASE WHEN t.progress = 0 THEN 1 ELSE 0 END) AS uncompleted,
+          (SUM(t.progress) / (COUNT(*) * 100)) * 100 AS progress,
+          COUNT(*) AS task_count
+      FROM tasks t
+      LEFT JOIN projectstbl p ON p.ID = t.projectID
+      GROUP BY t.projectID, t.label;
+    `;
+
+    db.query(query, (err, result) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: err });
+      }
+
+      // Restructure result into desired format
+      const projectMap = {};
+
+      result.forEach(row => {
+        if (!projectMap[row.projectID]) {
+          projectMap[row.projectID] = {
+            id: row.projectID.toString(),
+            name: row.project_name,
+            progress: 0,
+            completed: 0,
+            uncompleted: 0,
+            tasks: []
+          };
+        }
+
+        // Push task into project
+        projectMap[row.projectID].tasks.push({
+          name: row.task_label,
+          progress: row.progress
+        });
+
+        // Count stats
+        projectMap[row.projectID].completed += row.completed;
+        projectMap[row.projectID].uncompleted += row.uncompleted;
+      });
+
+      // Compute project progress
+      let projects = Object.values(projectMap);
+      projects.forEach(project => {
+        if (project.tasks.length > 0) {
+          const totalProgress = project.tasks.reduce((sum, t) => sum + t.progress, 0);
+          project.progress = Math.round(totalProgress / project.tasks.length);
+        }
+      });
+
+      // Sort projects by progress descending
+      projects.sort((a, b) => b.progress - a.progress);
+
+      res.json({
+        ok: true,
+        message: "Success",
+        result: projects
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: error });
+  }
+});
+
+
+// app.post('/api/get_projectRanking', (req, res) => {
+//   try {
+//     const query = `
+//       SELECT 
+//           t.projectID,
+//           t.label AS task_label,
+//           p.projectName AS project_name,
+//           SUM(CASE WHEN t.assign_status = 'assigned' THEN 1 ELSE 0 END) AS assigned_count,
+//           SUM(CASE WHEN t.assign_status = 'available' THEN 1 ELSE 0 END) AS available_count,
+//           SUM(CASE WHEN t.progress = 100 THEN 1 ELSE 0 END) AS completed,
+//           SUM(CASE WHEN t.progress = 0 THEN 1 ELSE 0 END) AS uncompleted,
+//           (SUM(t.progress) / (COUNT(*) * 100)) * 100 AS progress,
+//           COUNT(*) AS task_count
+//       FROM tasks t
+//       LEFT JOIN projectstbl p ON p.ID = t.projectID
+//       GROUP BY t.projectID,t.label;
+//     `;
+
+//     db.query(query, (err, result) => {
+//       if (err) {
+//         return res.status(500).json({ ok: false, message: err });
+//       }
+
+//       // Restructure result into desired format
+//       const projectMap = {};
+
+//       result.forEach(row => {
+//         if (!projectMap[row.projectID]) {
+//           projectMap[row.projectID] = {
+//             id: row.projectID.toString(),
+//             name: row.project_name,
+//             progress: 0,
+//             completed: 0,
+//             uncompleted: 0,
+//             tasks: []
+//           };
+//         }
+
+//         // Push task into project
+//         projectMap[row.projectID].tasks.push({
+//           name: row.task_label,
+//           progress: row.progress
+//         });
+
+//         // Count stats
+//         projectMap[row.projectID].completed += row.completed;
+//         projectMap[row.projectID].uncompleted += row.uncompleted;
+//       });
+
+//       // Compute project progress
+//       Object.values(projectMap).forEach(project => {
+//         if (project.tasks.length > 0) {
+//           const totalProgress = project.tasks.reduce((sum, t) => sum + t.progress, 0);
+//           project.progress = Math.round(totalProgress / project.tasks.length);
+//         }
+//       });
+
+//       res.json({
+//         ok: true,
+//         message: "Success",
+//         result: Object.values(projectMap)
+//       });
+//     });
+//   } catch (error) {
+//     res.status(500).json({ ok: false, message: error });
+//   }
+// });
+
+
+// app.post('/api/get_projectRanking',(req,res)=>{
+//   try {
+//     const query = `
+//       SELECT 
+//           projectID,
+//           label AS task_label,
+//           SUM(CASE WHEN assign_status = 'assigned' THEN 1 ELSE 0 END) AS assigned_count,
+//           SUM(CASE WHEN assign_status = 'available' THEN 1 ELSE 0 END) AS available_count,
+//           SUM(CASE WHEN progress = 100 THEN 1 ELSE 0 END) AS completed_count,
+//           SUM(CASE WHEN progress = 0 THEN 1 ELSE 0 END) AS uncompleted_count,
+//           (SUM(progress) / (COUNT(*) * 100)) * 100 AS progress,
+//           COUNT(*) AS task_count
+//       FROM tasks
+//       GROUP BY projectID,label;
+
+//     `;
+
+//     db.query(query,(err,result)=>{
+//       if(err){
+//         return res.status(500).json({ok:false,message: err})
+//       }
+//       res.json({ok:true,message:"Success",result})
+//     })
+
+//   } catch (error) {
+//     res.status(500).json({ok:false,message:error})
+//   }
+// })
 
 // para sa port connection--------------------------------------------->
 

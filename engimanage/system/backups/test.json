@@ -1,0 +1,92 @@
+[
+  {
+    "assigned_count": 1,
+    "available_count": 0,
+    "completed_count": 1,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": " Bbn",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 4,
+    "available_count": 0,
+    "completed_count": 4,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 4,
+    "task_label": "asdasd",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 1,
+    "available_count": 0,
+    "completed_count": 1,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": "asdhajsdgh",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 0,
+    "available_count": 1,
+    "completed_count": 0,
+    "progress": 0,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": "Hbbb",
+    "uncompleted_count": 1
+  },
+  {
+    "assigned_count": 1,
+    "available_count": 0,
+    "completed_count": 1,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": "Hhh",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 1,
+    "available_count": 0,
+    "completed_count": 1,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": "Order materials ",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 1,
+    "available_count": 0,
+    "completed_count": 1,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": "Vvggg",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 1,
+    "available_count": 0,
+    "completed_count": 1,
+    "progress": 100,
+    "projectID": 120,
+    "task_count": 1,
+    "task_label": "Vvvvv",
+    "uncompleted_count": 0
+  },
+  {
+    "assigned_count": 0,
+    "available_count": 1,
+    "completed_count": 0,
+    "progress": 0,
+    "projectID": 121,
+    "task_count": 1,
+    "task_label": "Xccf",
+    "uncompleted_count": 1
+  }
+]

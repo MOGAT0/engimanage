@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   Modal,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
@@ -94,13 +95,41 @@ const TaskView = () => {
       const data = await response.json();
 
       if (data.ok) {
-        alert("Work submitted! Task completed");
+        Alert.alert("Success","Task Submitted Successfully!")
+        evaluate_employee();
         router.back();
       }
     } catch (error) {
       console.log(error);
     }
   };
+
+  const evaluate_employee = async ()=>{
+    try {
+      const response = await fetch(`${link.api_link}/employee_evaluation`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({})
+      });
+
+      const data = await response.json();
+
+      if(data.ok){
+        // alert(data.message);
+        
+      }else{
+        console.log(data.message);
+        
+      }
+
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
+
 
   const handle_openComment = () => {
     const matchedTask = taskData?.find((task) => task.ID == task_id);
@@ -308,6 +337,12 @@ const TaskView = () => {
                 </Text>
               }
             />
+            <TouchableOpacity
+              style={styles.done_btn}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={{color:"white",fontWeight:"bold"}}>Done</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -392,7 +427,13 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   submitText: { color: "#fff", fontWeight: "bold" },
-
+  done_btn:{
+    backgroundColor:"#03b7ffff",
+    padding:10,
+    borderRadius:100,
+    justifyContent: 'center',
+    alignItems:"center"
+  },
   caretBtn: {
     padding: 10,
     borderRadius: 20,

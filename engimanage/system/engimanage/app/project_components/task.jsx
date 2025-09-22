@@ -152,7 +152,7 @@ const Task = ({ projectID }) => {
       const data = await response.json();
 
       if (data.ok) {
-        Toast.success("Task assigned successfully");
+        // Toast.success("Task assigned successfully");
         handleGetTasks();
         setAssignModalVisible(false);
       } else {
@@ -269,7 +269,7 @@ const Task = ({ projectID }) => {
 
       const data = await response.json();
       if (data.ok) {
-        Toast.success("Task taken successfully");
+        // Toast.success("Task taken successfully");
         handleGetTasks();
       } else {
         Toast.error(data.message || "Failed to take task");
@@ -301,7 +301,7 @@ const Task = ({ projectID }) => {
 
       const data = await response.json();
       if (data.ok) {
-        Toast.success("Task created successfully");
+        // Toast.success("Task created successfully");
         handleGetTasks();
         setDeadline(null);
         setNewTaskDescription("");
@@ -477,6 +477,9 @@ const Task = ({ projectID }) => {
                                 break;
                               case "pending":
                                 color = "orange";
+                                break;
+                              case "overdue":
+                                color = "red";
                                 break;
                             }
                             return {
