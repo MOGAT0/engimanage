@@ -7,7 +7,7 @@ const AdminProfile = () => {
 
   const handleLogout = async () => {
     try {
-      await SecureStore.deleteItemAsync("loginData");
+      await SecureStore.deleteItemAsync("adminLoginData");
       router.dismissAll();
     } catch (error) {
       console.log("Logout error:", error);

@@ -266,7 +266,7 @@ const Overall_dashboard = () => {
       </View>
 
       {/* Employees */}
-      {activeTab === "employees" && (
+      {(activeTab === "employees" && employees.length > 0) && (
         <View style={{ flex: 1 }}>
           <Text style={styles.sectionTitle}>🏆 Top Performing Employees</Text>
           <View style={styles.podiumContainer}>
@@ -336,7 +336,7 @@ const Overall_dashboard = () => {
                     fontSize: 18,
                   }}
                 >
-                  UNRANKED
+                  Not in Rank
                 </Text>
                 <Text
                   style={{ color: "white", fontWeight: "bold", fontSize: 13 }}

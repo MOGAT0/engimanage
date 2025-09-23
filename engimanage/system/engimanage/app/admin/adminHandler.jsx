@@ -5,7 +5,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 import AdminDashboard from "./adminDashboard";
 import ManageRoles from "./manageRoles";
-import ProjectManager from "./projectManager";
+import ProjectManagement from "./projectManagement";
 import UserControl from "./userControl";
 import AdminProfile from "./adminProfile";
 import Project from "../project";
@@ -18,8 +18,8 @@ const ManageRole_Page = () =>{
     return <ManageRoles/>;
 };
 
-const ProjectManager_Page = ()=>{
-    return <ProjectManager/>;
+const ProjectManagement_Page = ()=>{
+    return <ProjectManagement/>;
 };
 
 const UserControl_Page = ()=>{
@@ -57,7 +57,7 @@ const adminHandler = () => {
               iconName = focused ? "id-card" : "id-card-outline";
             } 
 
-            else if (route.name === "ProjectManager"){
+            else if (route.name === "ProjectManagement"){
               iconName = focused ? "library" : "library-outline";
             }
             
@@ -76,27 +76,27 @@ const adminHandler = () => {
       >
         <Tab.Screen
           name="Dashboard"
-          options={{ headerShown: false, headerTitle: "shit" }}
+          options={{ headerShown: false, headerTitle: "" }}
           component={Dashboard}
         />
         <Tab.Screen
           name="ManageRoles"
-          options={{ headerShown: false, headerTitle: "shit" }}
+          options={{ headerShown: false, headerTitle: "",title:"Roles"}}
           component={ManageRole_Page}
         />
         <Tab.Screen
-          name="ProjectManager"
-          options={{ headerShown: false, headerTitle: "shit" }}
-          component={ProjectList}
+          name="ProjectManagement"
+          options={{ headerShown: false, headerTitle: "",title:"Projects" }}
+          component={ProjectManagement_Page}
         />
         <Tab.Screen
           name="UserControl"
-          options={{ headerShown: false, headerTitle: "shit" }}
+          options={{ headerShown: false, headerTitle: "",title:"Employees" }}
           component={UserControl_Page}
         />
         <Tab.Screen
           name="Profile"
-          options={{ headerShown: false, headerTitle: "shit" }}
+          options={{ headerShown: false, headerTitle: "" }}
           component={Profile}
         />
 
