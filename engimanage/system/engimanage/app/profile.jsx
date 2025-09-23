@@ -226,8 +226,8 @@ const Profile = () => {
             icon="notifications-outline"
             label="Notifications"
             onPress={() => router.navigate("/notif")}
-          /> */}
-          {/* <Option
+          />
+          <Option
             icon="create-outline"
             label="Edit Name"
             onPress={() => alert("Edit Name")}

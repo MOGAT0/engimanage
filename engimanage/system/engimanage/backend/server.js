@@ -264,7 +264,7 @@ app.post("/api/adminLogin",(req,res)=>{
   }
 
   const query = `
-    SELECT u.*
+    SELECT u.*,p.permission_key
     FROM users u
     JOIN accessgrant ag ON u.access_level = ag.grantID
     JOIN permissions p ON ag.permission_key = p.permissionID
@@ -2602,105 +2602,6 @@ app.post('/api/get_projectRanking', (req, res) => {
     res.status(500).json({ ok: false, message: error });
   }
 });
-
-
-// app.post('/api/get_projectRanking', (req, res) => {
-//   try {
-//     const query = `
-//       SELECT 
-//           t.projectID,
-//           t.label AS task_label,
-//           p.projectName AS project_name,
-//           SUM(CASE WHEN t.assign_status = 'assigned' THEN 1 ELSE 0 END) AS assigned_count,
-//           SUM(CASE WHEN t.assign_status = 'available' THEN 1 ELSE 0 END) AS available_count,
-//           SUM(CASE WHEN t.progress = 100 THEN 1 ELSE 0 END) AS completed,
-//           SUM(CASE WHEN t.progress = 0 THEN 1 ELSE 0 END) AS uncompleted,
-//           (SUM(t.progress) / (COUNT(*) * 100)) * 100 AS progress,
-//           COUNT(*) AS task_count
-//       FROM tasks t
-//       LEFT JOIN projectstbl p ON p.ID = t.projectID
-//       GROUP BY t.projectID,t.label;
-//     `;
-
-//     db.query(query, (err, result) => {
-//       if (err) {
-//         return res.status(500).json({ ok: false, message: err });
-//       }
-
-//       // Restructure result into desired format
-//       const projectMap = {};
-
-//       result.forEach(row => {
-//         if (!projectMap[row.projectID]) {
-//           projectMap[row.projectID] = {
-//             id: row.projectID.toString(),
-//             name: row.project_name,
-//             progress: 0,
-//             completed: 0,
-//             uncompleted: 0,
-//             tasks: []
-//           };
-//         }
-
-//         // Push task into project
-//         projectMap[row.projectID].tasks.push({
-//           name: row.task_label,
-//           progress: row.progress
-//         });
-
-//         // Count stats
-//         projectMap[row.projectID].completed += row.completed;
-//         projectMap[row.projectID].uncompleted += row.uncompleted;
-//       });
-
-//       // Compute project progress
-//       Object.values(projectMap).forEach(project => {
-//         if (project.tasks.length > 0) {
-//           const totalProgress = project.tasks.reduce((sum, t) => sum + t.progress, 0);
-//           project.progress = Math.round(totalProgress / project.tasks.length);
-//         }
-//       });
-
-//       res.json({
-//         ok: true,
-//         message: "Success",
-//         result: Object.values(projectMap)
-//       });
-//     });
-//   } catch (error) {
-//     res.status(500).json({ ok: false, message: error });
-//   }
-// });
-
-
-// app.post('/api/get_projectRanking',(req,res)=>{
-//   try {
-//     const query = `
-//       SELECT 
-//           projectID,
-//           label AS task_label,
-//           SUM(CASE WHEN assign_status = 'assigned' THEN 1 ELSE 0 END) AS assigned_count,
-//           SUM(CASE WHEN assign_status = 'available' THEN 1 ELSE 0 END) AS available_count,
-//           SUM(CASE WHEN progress = 100 THEN 1 ELSE 0 END) AS completed_count,
-//           SUM(CASE WHEN progress = 0 THEN 1 ELSE 0 END) AS uncompleted_count,
-//           (SUM(progress) / (COUNT(*) * 100)) * 100 AS progress,
-//           COUNT(*) AS task_count
-//       FROM tasks
-//       GROUP BY projectID,label;
-
-//     `;
-
-//     db.query(query,(err,result)=>{
-//       if(err){
-//         return res.status(500).json({ok:false,message: err})
-//       }
-//       res.json({ok:true,message:"Success",result})
-//     })
-
-//   } catch (error) {
-//     res.status(500).json({ok:false,message:error})
-//   }
-// })
 
 // para sa port connection--------------------------------------------->
 

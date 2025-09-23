@@ -146,8 +146,14 @@ const Overall_dashboard = () => {
 
   useEffect(() => {
     getUserInfo();
-    get_taks_info();
   }, []);
+
+  useEffect(()=>{
+    if(projects.length === 0){
+      get_taks_info();
+    }
+
+  },[projects])
 
   useEffect(() => {
     if (userinfo && employees.length === 0) {
@@ -298,14 +304,16 @@ const Overall_dashboard = () => {
               <Text style={styles.podiumText}>{employees[2]?.name}</Text>
             </View>
           </View>
-          <FlatList
-            data={employees}
-            keyExtractor={(item) => item.id}
-            renderItem={renderEmployeeRow}
-            contentContainerStyle={{ paddingBottom: 100, paddingTop: 15 }}
-            refreshing={refreshingEmployees}
-            onRefresh={fetch_ranking_info}
-          />
+          {employees && (
+            <FlatList
+              data={employees}
+              keyExtractor={(item) => item.id}
+              renderItem={renderEmployeeRow}
+              contentContainerStyle={{ paddingBottom: 100, paddingTop: 15 }}
+              refreshing={refreshingEmployees}
+              onRefresh={fetch_ranking_info}
+            />
+          )}
 
           <View style={styles.yourRankBox}>
             {yourRank ? (

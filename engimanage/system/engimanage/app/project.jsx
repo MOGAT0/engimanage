@@ -61,17 +61,18 @@ const Project = () => {
 
       try {
         const loginDataString = await SecureStore.getItemAsync("loginData");
+        
         if (loginDataString) {
           const loginData = JSON.parse(loginDataString);
-          console.log("====================================");
-          console.log(loginData);
-          console.log("====================================");
           setUserRole(loginData.role);
           setUserID(loginData.ID);
           setPass(loginData.pass);
           setEmail(loginData.email);
           setProjectManager(loginData.fname);
           setUserPermission(loginData.permission_key);
+          console.log("employee account:");
+          console.log(loginData);
+          
         }
       } catch (error) {
         console.error("Failed to fetch user role:", error);
@@ -291,7 +292,7 @@ const Project = () => {
 
       const data = await response.json();
 
-      if (data.length >= 1) {
+      if (data.length >= 1 || userPermission === "full") {
         router.navigate(
           `/project_components/projectHandler?projectID=${projectID}`
         );
@@ -394,6 +395,7 @@ const Project = () => {
       >
         {getFilteredProjects().map((project) => (
           <ProjectPanel
+            isViewer={userPermission === "view"}
             key={project.ID}
             pmanager={project.projectManager.replace(/_/g, " ")}
             pname={project.projectName}
@@ -411,19 +413,29 @@ const Project = () => {
         ))}
       </ScrollView>
 
-      <TouchableOpacity
-        onPress={() => {
-           {userPermission === "add_edit_update_delete" || userPermission === "full" ? setPopup(true) : setJoinpopup(true)}
-          // setPopup(true);
-        }}
-        style={styles.createBTN}
-      >
-        <View>
-          <Text style={{ color: "#fff", fontSize: 15, fontWeight: "bold" }}>
-            {userPermission === "add_edit_update_delete" || userPermission === "full" ? "Create/Join" : "Join Project"}
-          </Text>
-        </View>
-      </TouchableOpacity>
+      {userPermission !== "view" && (
+        <TouchableOpacity
+          onPress={() => {
+            {
+              userPermission === "add_edit_update_delete" ||
+              userPermission === "full"
+                ? setPopup(true)
+                : setJoinpopup(true);
+            }
+            // setPopup(true);
+          }}
+          style={styles.createBTN}
+        >
+          <View>
+            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "bold" }}>
+              {userPermission === "add_edit_update_delete" ||
+              userPermission === "full"
+                ? "Create/Join"
+                : "Join Project"}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      )}
 
       <Modal visible={popUp} animationType="slide" transparent={true}>
         <TouchableOpacity
@@ -521,10 +533,12 @@ const Project = () => {
             setJoinpopup(false);
           }}
         />
-        <Dialog.Button
-          label="Request Join"
-          onPress={() => send_request_join(selectedProjectID, userID)}
-        />
+        {!popUp && (
+          <Dialog.Button
+            label="Request Join"
+            onPress={() => send_request_join(selectedProjectID, userID)}
+          />
+        )}
       </Dialog.Container>
     </View>
   );

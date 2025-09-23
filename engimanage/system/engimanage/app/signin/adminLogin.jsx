@@ -26,10 +26,10 @@ export default function AdminLogin() {
   const [showModal, setShowModal] = useState(true);
 
   useEffect(() => {
-    // SecureStore.deleteItemAsync("adminLoginData")
+
     const checkLogin = async () => {
       try {
-        const userData = await SecureStore.getItemAsync("adminLoginData");
+        const userData = await SecureStore.getItemAsync("loginData");
         if (!userData) {
           setLoading(false);
           return;
@@ -56,10 +56,10 @@ export default function AdminLogin() {
 
         if (response.ok && Object.keys(data).length >= 1) {
           console.log("Admin auto login success:", data[0]);
-          await saveLogin("adminLoginData", data[0]);
+          await saveLogin("loginData", data[0]);
           router.navigate("../admin/adminHandler");
         } else {
-          await SecureStore.deleteItemAsync("adminLoginData");
+          await SecureStore.deleteItemAsync("loginData");
           setLoading(false);
         }
       } catch (error) {
@@ -95,7 +95,7 @@ export default function AdminLogin() {
 
       if (response.ok && Object.keys(data).length >= 1) {
         setShowModal(false);
-        await saveLogin("adminLoginData", data[0]);
+        await saveLogin("loginData", data[0]);
         setEmail("");
         setPass("");
         router.navigate("../admin/adminHandler");

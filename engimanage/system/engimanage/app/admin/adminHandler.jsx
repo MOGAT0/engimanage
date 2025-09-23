@@ -8,6 +8,7 @@ import ManageRoles from "./manageRoles";
 import ProjectManager from "./projectManager";
 import UserControl from "./userControl";
 import AdminProfile from "./adminProfile";
+import Project from "../project";
 
 const Dashboard = () => {
   return <AdminDashboard />;
@@ -28,6 +29,10 @@ const UserControl_Page = ()=>{
 const Profile = ()=>{
     return <AdminProfile/>;
 };
+
+const ProjectList = ()=> {
+  return <Project/>;
+}
 
 
 const Tab = createBottomTabNavigator();
@@ -82,7 +87,7 @@ const adminHandler = () => {
         <Tab.Screen
           name="ProjectManager"
           options={{ headerShown: false, headerTitle: "shit" }}
-          component={ProjectManager_Page}
+          component={ProjectList}
         />
         <Tab.Screen
           name="UserControl"

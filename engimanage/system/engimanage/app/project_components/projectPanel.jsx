@@ -15,9 +15,10 @@ const ProjectPanel = ({
   txtstyle,
   joined,
   projectStatus,
+  isViewer,
 }) => {
   return (
-    <TouchableOpacity onPress={onClick} style={styles.panelContainer}>
+    <TouchableOpacity onPress={onClick} style={styles.panelContainer} disabled={isViewer}>
       <Text style={styles.pnameText}>{pname}</Text>
       <Text style={styles.pmanagerText}>{pmanager}</Text>
       {joined && <Text style={styles.join}>Joined</Text>}

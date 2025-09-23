@@ -174,8 +174,8 @@ const DashboardPage = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchTasks(); // your existing function
-    await get_projectProgress(); // optional: also refresh progress
+    await fetchTasks();
+    await get_projectProgress();
     setRefreshing(false);
   };
 
