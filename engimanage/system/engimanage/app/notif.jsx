@@ -4,12 +4,13 @@ import DataSecureStorage from "./components/DataSecureStorage";
 import globalScript from "./globals/globalScript";
 import CustomHeader from "./components/customHeader";
 import { useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 
 import Request from "./components/request";
 
 const link = globalScript;
-const Notif = () => {
-  const { projectID } = useLocalSearchParams();
+const Notif = ({ projectID, homeRoute }) => {
+  // const { projectID } = useLocalSearchParams();
   const [notif, setNotif] = useState([]);
   const [employeeID, setEmployeeID] = useState(null);
 
@@ -96,7 +97,11 @@ const Notif = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <CustomHeader title={"Notifications"} backName="Home" routePath={"tabsHandler"} />
+      <CustomHeader
+        title={"Notifications"}
+        backName="Home"
+        routePath={homeRoute}
+      />
       {notif.map((notif) => (
         <Request
           key={notif.notif_id}

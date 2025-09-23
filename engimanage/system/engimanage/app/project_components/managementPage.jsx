@@ -14,11 +14,13 @@ import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DataSecureStorage from "../components/DataSecureStorage";
+import { useLocalSearchParams } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import link from "../globals/globalScript";
 import CustomHeader from "../components/customHeader";
 
-const ManagementPage = ({ projectID }) => {
+const ManagementPage = ({ projectID, homeRoute }) => {
+  
   const [budget, setBudget] = useState(0);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
 
@@ -354,7 +356,7 @@ const ManagementPage = ({ projectID }) => {
       <ScrollView showsVerticalScrollIndicator={false}>
         <CustomHeader
           title="Project Management"
-          routePath={"tabsHandler"}
+          routePath={homeRoute}
           backName="Home"
         />
         <Text style={styles.title}>{projectName}</Text>

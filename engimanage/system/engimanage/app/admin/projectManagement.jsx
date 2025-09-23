@@ -8,52 +8,110 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { router } from "expo-router";
+
+import DataSecureStorage from "../components/DataSecureStorage";
+import globalScript from "../globals/globalScript";
+const link = globalScript;
 
 // ----- Custom Component -----
-const ProjectCard = ({ name, description, members }) => {
+const ProjectCard = ({ project }) => {
+  // Handle members (parse string or fallback to 0)
+  let memberCount = 0;
+  if (project.members) {
+    try {
+      const parsed = JSON.parse(project.members);
+      memberCount = Array.isArray(parsed) ? parsed.length : 0;
+    } catch (e) {
+      memberCount = 0;
+    }
+  }
+
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(()=>{
+    getUserInfo();
+  },[])
+
+  const getUserInfo = async () => {
+    const data = await DataSecureStorage.getItem("adminLoginData");
+    
+    if (data) {
+      const info = JSON.parse(data);
+      setUserInfo(info);
+      console.log("=========");
+      console.log(info);
+      console.log("=========");
+    }
+  };
+
+  // project membership verification before opening sang project ----------------->
+  const handleProjectClick = async (projectID) => {
+    // console.log(projectID);
+
+    try {
+      const reqBody = {
+        userID:userInfo.ID,
+        projectID,
+      };
+      const response = await fetch(`${link.api_link}/checkProjectMembers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reqBody),
+      });
+
+      const data = await response.json();
+
+      if (data.length >= 1 || userInfo.permission_key === "full") {
+        router.navigate(
+          `/project_components/projectHandler?projectID=${projectID}&homeRoute=../../admin/adminHandler`
+        );
+      } else {
+        setSelectedProjectID(projectID);
+        setJoinpopup(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.projectName}>{name}</Text>
-      <Text style={styles.projectDescription}>{description}</Text>
-      <View style={styles.membersContainer}>
-        <Ionicons name="person" size={16} color="#555" />
-        <Text style={styles.membersText}>{members}</Text>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => handleProjectClick(project.ID)}
+    >
+      <Text style={styles.projectName}>{project.projectName}</Text>
+      <Text style={styles.projectDesc}>{project.desc}</Text>
+      <View style={styles.memberRow}>
+        <Ionicons name="person-outline" size={16} color="#555" />
+        <Text style={styles.memberCount}>{memberCount} members</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
 // ----- Main Page -----
 const projectManagement = () => {
-  const projects = [
-    {
-      id: "1",
-      name: "Website Redesign",
-      description: "Updating the UI/UX for client website.",
-      members: 5,
-    },
-    {
-      id: "2",
-      name: "Mobile App Development",
-      description: "Building a cross-platform project management app.",
-      members: 8,
-    },
-    {
-      id: "3",
-      name: "Marketing Campaign",
-      description: "Launching digital ads for the new product line.",
-      members: 3,
-    },
-    {
-      id: "4",
-      name: "AI Research",
-      description: "Exploring new machine learning techniques.",
-      members: 6,
-    },
-  ];
-
+  const [projects, setProjects] = useState([]); // ✅ fix null
   const [searchText, setSearchText] = useState("");
-  const [filteredProjects, setFilteredProjects] = useState(projects);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(()=>{
+    getUserInfo();
+  },[])
+
+  const getUserInfo = async () => {
+    const data = await DataSecureStorage.getItem("adminLoginData");
+    
+    if (data) {
+      const info = JSON.parse(data);
+      setUserInfo(info);
+    }
+  };
 
   // --- Debounce Search ---
   useEffect(() => {
@@ -62,14 +120,46 @@ const projectManagement = () => {
         setFilteredProjects(projects);
       } else {
         const filtered = projects.filter((p) =>
-          p.name.toLowerCase().includes(searchText.toLowerCase())
+          p.projectName.toLowerCase().includes(searchText.toLowerCase())
         );
         setFilteredProjects(filtered);
       }
-    }, 1000); // 1 second debounce
+    }, 1000);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchText]);
+  }, [searchText, projects]); // ✅ include projects
+
+  // Sync filtered list with fetched projects
+  useEffect(() => {
+    setFilteredProjects(projects);
+  }, [projects]);
+
+  useEffect(() => {
+    getProjects();
+  }, []);
+
+  const getProjects = async () => {
+    try {
+      const response = await fetch(`${link.api_link}/getprojects`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setProjects(data.projects);
+        // console.log("Projects:", data.projects);
+      } else {
+        console.log("No data response");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -90,28 +180,22 @@ const projectManagement = () => {
           onChangeText={setSearchText}
           placeholderTextColor="#777"
         />
-        {searchText.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchText("")}>
-            <Ionicons
-              name="close"
-              size={20}
-              color="#555"
-              style={{ marginHorizontal: 8 }}
-            />
-          </TouchableOpacity>
-        )}
+
+        <TouchableOpacity onPress={() => setSearchText("")}>
+          <Ionicons
+            name="close"
+            size={20}
+            color="#555"
+            style={{ marginHorizontal: 8 }}
+          />
+        </TouchableOpacity>
       </View>
 
       <FlatList
         data={filteredProjects}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ProjectCard
-            name={item.name}
-            description={item.description}
-            members={item.members}
-          />
-        )}
+        keyExtractor={(item) => item.ID.toString()}
+        contentContainerStyle={{ padding: 5 }}
+        renderItem={({ item }) => <ProjectCard project={item} />}
       />
     </View>
   );
@@ -127,17 +211,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   header: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 20,
+    marginTop: 25,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#dce9dc",
-    borderRadius: 20,
+    borderRadius: 10,
     paddingHorizontal: 4,
     marginBottom: 16,
+    paddingVertical: 5,
+    elevation: 3,
   },
   searchInput: {
     flex: 1,
@@ -147,32 +234,31 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    padding: 16,
+    borderRadius: 10,
+    padding: 15,
     marginBottom: 12,
-    borderRadius: 12,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
     elevation: 3,
   },
   projectName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 5,
   },
-  projectDescription: {
+  projectDesc: {
     fontSize: 14,
     color: "#666",
     marginBottom: 8,
   },
-  membersContainer: {
+  memberRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-  membersText: {
-    marginLeft: 4,
+  memberCount: {
+    marginLeft: 5,
     fontSize: 14,
-    color: "#555",
+    color: "#333",
   },
 });

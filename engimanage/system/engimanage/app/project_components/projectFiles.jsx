@@ -22,7 +22,7 @@ import CustomHeader from "../components/customHeader";
 
 const link = globalScript;
 
-const ProjectFiles = () => {
+const ProjectFiles = ({ projectID, homeRoute }) => {
   const [items, setItems] = useState([]);
   const [currentPath, setCurrentPath] = useState("");
   const [loading, setLoading] = useState(false);
@@ -199,7 +199,7 @@ const ProjectFiles = () => {
     <View style={styles.container}>
       <CustomHeader
         title="Project Files"
-        routePath={"tabsHandler"}
+        routePath={homeRoute}
         backName="Home"
       />
       {/* Back Button + Path */}

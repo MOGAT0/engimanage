@@ -61,7 +61,7 @@ const Project = () => {
 
       try {
         const loginDataString = await SecureStore.getItemAsync("loginData");
-        
+
         if (loginDataString) {
           const loginData = JSON.parse(loginDataString);
           setUserRole(loginData.role);
@@ -72,7 +72,6 @@ const Project = () => {
           setUserPermission(loginData.permission_key);
           console.log("employee account:");
           console.log(loginData);
-          
         }
       } catch (error) {
         console.error("Failed to fetch user role:", error);
@@ -136,8 +135,17 @@ const Project = () => {
   // display all existing groups ---------------------------------->
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${link.api_link}/getprojects`);
+      const response = await fetch(`${link.api_link}/getprojects`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
       const data = await response.json();
+
+      console.log(data);
 
       if (data.ok) {
         setProjects(data.projects);
@@ -273,9 +281,9 @@ const Project = () => {
     }
   };
 
-  // project membership checker before mag open ang project panel ----------------->
+  // project membership verification before opening sang project ----------------->
   const handleProjectClick = async (projectID) => {
-    console.log(projectID);
+    // console.log(projectID);
 
     try {
       const reqBody = {
@@ -294,7 +302,7 @@ const Project = () => {
 
       if (data.length >= 1 || userPermission === "full") {
         router.navigate(
-          `/project_components/projectHandler?projectID=${projectID}`
+          `/project_components/projectHandler?projectID=${projectID}&homeRoute=tabsHandler`
         );
       } else {
         setSelectedProjectID(projectID);

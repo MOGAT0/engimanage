@@ -43,7 +43,7 @@ const CustomCheckbox = ({ checked, onChange, show_checkBox }) => (
   </TouchableOpacity>
 );
 
-const Task = ({ projectID }) => {
+const Task = ({ projectID, homeRoute }) => {
   const [userInfo, setUserinfo] = useState(null);
   const [TASKS, setTask] = useState(null);
   const [taskProgress, setTaskProgress] = useState({});
@@ -76,7 +76,6 @@ const Task = ({ projectID }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-
       handleGetTasks();
     }, 500);
 
@@ -352,7 +351,7 @@ const Task = ({ projectID }) => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title="Tasks" routePath={"tabsHandler"} backName="Home" />
+      <CustomHeader title="Tasks" routePath={homeRoute} backName="Home" />
       <Container
         position="top"
         duration={1500}
@@ -364,7 +363,8 @@ const Task = ({ projectID }) => {
           {/* <Text style={styles.title}>Tasks</Text> */}
           {loadingTimeout ? (
             <>
-              {(userInfo?.permission_key === "full" || userInfo?.permission_key === "add_edit_update_delete") && (
+              {(userInfo?.permission_key === "full" ||
+                userInfo?.permission_key === "add_edit_update_delete") && (
                 <TouchableOpacity
                   style={styles.addButton}
                   onPress={() => setShowModal(true)}
@@ -395,7 +395,8 @@ const Task = ({ projectID }) => {
             />
           </View>
 
-          {(userInfo?.permission_key === "full" || userInfo?.permission_key === "add_edit_update_delete") && (
+          {(userInfo?.permission_key === "full" ||
+            userInfo?.permission_key === "add_edit_update_delete") && (
             <TouchableOpacity
               style={styles.addButton}
               onPress={() => setShowModal(true)}
@@ -494,7 +495,9 @@ const Task = ({ projectID }) => {
                     </View>
                   </TouchableOpacity>
 
-                  {(userInfo?.permission_key === "add_edit_update_delete" || userInfo?.permission_key === "full" || userInfo?.permission_key === "edit_update") && (
+                  {(userInfo?.permission_key === "add_edit_update_delete" ||
+                    userInfo?.permission_key === "full" ||
+                    userInfo?.permission_key === "edit_update") && (
                     <TouchableOpacity
                       ref={(el) => (menuButtonRefs.current[task.ID] = el)}
                       collapsable={false}
@@ -526,34 +529,36 @@ const Task = ({ projectID }) => {
                       style={StyleSheet.absoluteFill}
                     >
                       <View style={[styles.menuCard, getMenuStyle()]}>
-                        {(userInfo?.permission_key === "add_edit_update_delete" || userInfo?.permission_key === "full") && (
-                        <Pressable
-                          style={styles.menuItem}
-                          onPress={() => {
-                            const currentTask = TASKS.find(
-                              (t) => t.ID === menuTaskId
-                            );
-                            openAssignModal({
-                              userId: userInfo.ID,
-                              projectId: currentTask.projectID,
-                              taskId: currentTask.ID,
-                              taskName: currentTask.label,
-                              taskDeadline: currentTask.task_deadline,
-                            });
-                            console.log("Assign pressed", {
-                              userId: userInfo.ID,
-                              projectId: currentTask.projectID,
-                              taskId: currentTask.ID,
-                              taskName: currentTask.label,
-                              taskDeadline: currentTask.task_deadline,
-                            });
+                        {(userInfo?.permission_key ===
+                          "add_edit_update_delete" ||
+                          userInfo?.permission_key === "full") && (
+                          <Pressable
+                            style={styles.menuItem}
+                            onPress={() => {
+                              const currentTask = TASKS.find(
+                                (t) => t.ID === menuTaskId
+                              );
+                              openAssignModal({
+                                userId: userInfo.ID,
+                                projectId: currentTask.projectID,
+                                taskId: currentTask.ID,
+                                taskName: currentTask.label,
+                                taskDeadline: currentTask.task_deadline,
+                              });
+                              console.log("Assign pressed", {
+                                userId: userInfo.ID,
+                                projectId: currentTask.projectID,
+                                taskId: currentTask.ID,
+                                taskName: currentTask.label,
+                                taskDeadline: currentTask.task_deadline,
+                              });
 
-                            closeMenu();
-                          }}
-                        >
-                          <Ionicons name="person-add-outline" size={18} />
-                          <Text style={styles.menuText}>Assign To</Text>
-                        </Pressable>
+                              closeMenu();
+                            }}
+                          >
+                            <Ionicons name="person-add-outline" size={18} />
+                            <Text style={styles.menuText}>Assign To</Text>
+                          </Pressable>
                         )}
 
                         <Pressable
@@ -588,24 +593,26 @@ const Task = ({ projectID }) => {
                         </Pressable>
 
                         <View style={styles.menuDivider} />
-                        
-                        {(userInfo?.permission_key === "add_edit_update_delete" || userInfo?.permission_key === "full") && (
 
-                        <Pressable
-                          style={styles.menuItem}
-                          onPress={() => {
-                            const id = menuTaskId;
-                            closeMenu();
-                            if (id != null) handleDeteleTask(id);
-                          }}
-                        >
-                          <Ionicons name="trash-outline" size={18} />
-                          <Text style={[styles.menuText, { color: "#e53935" }]}>
-                            Delete
-                          </Text>
-                        </Pressable>
+                        {(userInfo?.permission_key ===
+                          "add_edit_update_delete" ||
+                          userInfo?.permission_key === "full") && (
+                          <Pressable
+                            style={styles.menuItem}
+                            onPress={() => {
+                              const id = menuTaskId;
+                              closeMenu();
+                              if (id != null) handleDeteleTask(id);
+                            }}
+                          >
+                            <Ionicons name="trash-outline" size={18} />
+                            <Text
+                              style={[styles.menuText, { color: "#e53935" }]}
+                            >
+                              Delete
+                            </Text>
+                          </Pressable>
                         )}
-
                       </View>
                     </View>
                   </Modal>

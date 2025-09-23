@@ -516,7 +516,7 @@ app.post("/api/register", (req, res) => {
 
 
 // get all projects -------------------------------------------------->
-app.get("/api/getprojects", (req, res) => {
+app.post("/api/getprojects", (req, res) => {
   const sql = "SELECT * FROM projectstbl ORDER BY ID desc";
 
   db.query(sql, (err, results) => {

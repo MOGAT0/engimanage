@@ -30,8 +30,9 @@ const CustomProgressBar = ({ progress }) => (
   </View>
 );
 
-const DashboardPage = () => {
-  const { projectID } = useLocalSearchParams();
+const DashboardPage = ({projectID,homeRoute}) => {
+  
+  // const { projectID, homeRoute } = useLocalSearchParams();
 
   // temporary data ===================================================================
   // const [projects] = useState([
@@ -69,7 +70,6 @@ const DashboardPage = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const get_projectProgress = async () => {
-    console.log("getprogress");
 
     try {
       const response = await fetch(`${link.api_link}/getProjectProgress`, {
@@ -181,7 +181,7 @@ const DashboardPage = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title="Project" routePath={"tabsHandler"} backName="Home" />
+      <CustomHeader title="Project" routePath={homeRoute} backName="Home" />
       {/* Generate Report Button */}
       <TouchableOpacity
         style={styles.reportButton}

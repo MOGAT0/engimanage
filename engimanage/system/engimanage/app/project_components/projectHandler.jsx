@@ -14,38 +14,42 @@ import ViewAssignedTasks from "./viewAssignedTasks";
 import Notif from "../notif";
 
 const Projects = ({route}) => {
-  const {projectID} = route.params;
-  return <DashboardPage projectID={projectID} />;
+  const {projectID, homeRoute} = route.params;
+  return <DashboardPage projectID={projectID} homeRoute={homeRoute} />;
 };
 
 const Management = ({route}) => {
-  const {projectID} = route.params;
-  return <ManagementPage projectID={projectID}/>;
+  const {projectID,homeRoute} = route.params;
+  return <ManagementPage projectID={projectID} homeRoute={homeRoute}/>;
 };
 
 const Tasks = ({route})=>{
-  const {projectID} = route.params;
-    return <Task projectID={projectID}/>;
+  const {projectID,homeRoute} = route.params;
+    return <Task projectID={projectID} homeRoute={homeRoute}/>;
 }
 
 const Tool = ({route})=>{
-  const {projectID} = route.params;
-    return <Tools projectID={projectID} />;
+  const {projectID,homeRoute} = route.params;
+    return <Tools projectID={projectID} homeRoute={homeRoute}/>;
 }
 
-const FilePage = () =>{
-  return <ProjectFiles/>;
+const FilePage = ({route}) =>{
+  const {projectID,homeRoute} = route.params;
+  return <ProjectFiles projectID={projectID} homeRoute={homeRoute}/>;
 }
 
-const Notification = () => {
-  return <Notif/>;
+const Notification = ({route}) => {
+  const {projectID,homeRoute} = route.params;
+  return <Notif projectID={projectID} homeRoute={homeRoute}/>;
 }
 
-const Select = () => {
+const Select = ({route}) => {
+  const {projectID,homeRoute} = route.params;
   return <Select_supplier/>;
 }
 
-const AssignedTasks = () => {
+const AssignedTasks = ({route}) => {
+  const {projectID,homeRoute} = route.params;
   return <ViewAssignedTasks />;
 }
 
@@ -53,7 +57,7 @@ const AssignedTasks = () => {
 const Tab = createBottomTabNavigator();
 
 const ProjectHandler = () => {
-  const { initialTab,projectID } = useLocalSearchParams(); 
+  const { initialTab,projectID,homeRoute } = useLocalSearchParams(); 
 
 
   return (
@@ -88,13 +92,13 @@ const ProjectHandler = () => {
           tabBarInactiveTintColor: "gray",
         })}
       >
-        <Tab.Screen name="dashboard" initialParams={{projectID}} component={Projects} options={{headerShown:false,title:"Dashboard"}}/>
-        <Tab.Screen name="management" initialParams={{projectID}} component={Management} options={{headerShown:false,title:"Management"}}/>
-        <Tab.Screen name="task" initialParams={{projectID}} component={Tasks} options={{headerShown:false,title:"Tasks"}}/>
+        <Tab.Screen name="dashboard" initialParams={{projectID,homeRoute}} component={Projects} options={{headerShown:false,title:"Dashboard"}}/>
+        <Tab.Screen name="management" initialParams={{projectID,homeRoute}} component={Management} options={{headerShown:false,title:"Management"}}/>
+        <Tab.Screen name="task" initialParams={{projectID,homeRoute}} component={Tasks} options={{headerShown:false,title:"Tasks"}}/>
         {/* <Tab.Screen name="assignedtasks" initialParams={{projectID}} component={AssignedTasks} options={{headerShown:false,title:"Assigned Tasks"}}/> */}
-        <Tab.Screen name="projectfiles" initialParams={{projectID}} component={FilePage} options={{headerShown:false,title:"Files"}}/>
+        <Tab.Screen name="projectfiles" initialParams={{projectID,homeRoute}} component={FilePage} options={{headerShown:false,title:"Files"}}/>
         {/* <Tab.Screen name="tools" initialParams={{projectID}} component={Tool} options={{headerShown:false,title:"Tools"}} /> */}
-        <Tab.Screen name="notifications" initialParams={{projectID}} component={Notification} options={{headerShown:false,title:"Notification"}} />
+        <Tab.Screen name="notifications" initialParams={{projectID,homeRoute}} component={Notification} options={{headerShown:false,title:"Notification"}} />
       </Tab.Navigator>
     </>
   );
