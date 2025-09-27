@@ -304,7 +304,7 @@ const Overall_dashboard = () => {
               <Text style={styles.podiumText}>{employees[2]?.name}</Text>
             </View>
           </View>
-          {employees && (
+          {employees.length > 0 && (
             <FlatList
               data={employees}
               keyExtractor={(item) => item.id}
