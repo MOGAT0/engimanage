@@ -39,7 +39,7 @@ const FilePage = ({route}) =>{
 }
 
 const Notification = ({route}) => {
-  const {projectID,homeRoute} = route.params;
+  const {projectID,homeRoute,userType} = route.params;
   return <Notif projectID={projectID} homeRoute={homeRoute}/>;
 }
 
@@ -98,7 +98,7 @@ const ProjectHandler = () => {
         {/* <Tab.Screen name="assignedtasks" initialParams={{projectID}} component={AssignedTasks} options={{headerShown:false,title:"Assigned Tasks"}}/> */}
         <Tab.Screen name="projectfiles" initialParams={{projectID,homeRoute}} component={FilePage} options={{headerShown:false,title:"Files"}}/>
         {/* <Tab.Screen name="tools" initialParams={{projectID}} component={Tool} options={{headerShown:false,title:"Tools"}} /> */}
-        <Tab.Screen name="notifications" initialParams={{projectID,homeRoute}} component={Notification} options={{headerShown:false,title:"Notification"}} />
+        <Tab.Screen name="notifications" initialParams={{projectID,homeRoute,userType}} component={Notification} options={{headerShown:false,title:"Notification"}} />
       </Tab.Navigator>
     </>
   );
