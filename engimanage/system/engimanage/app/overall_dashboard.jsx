@@ -148,12 +148,11 @@ const Overall_dashboard = () => {
     getUserInfo();
   }, []);
 
-  useEffect(()=>{
-    if(projects.length === 0){
+  useEffect(() => {
+    if (projects.length === 0) {
       get_taks_info();
     }
-
-  },[projects])
+  }, [projects]);
 
   useEffect(() => {
     if (userinfo && employees.length === 0) {
@@ -183,6 +182,10 @@ const Overall_dashboard = () => {
       const data = await response.json();
 
       if (data.ok) {
+        console.log("employee");
+
+        console.log(data.result);
+
         setemployee(data.result);
         setYourRank(data.result.find((a) => a.employee_id === userinfo.ID));
         setYourPosition(
@@ -213,6 +216,7 @@ const Overall_dashboard = () => {
       const data = await response.json();
 
       if (data.ok) {
+        console.log("projects");
         console.log(JSON.stringify(data.result));
         setProjects(data.result);
       } else {
@@ -220,7 +224,7 @@ const Overall_dashboard = () => {
       }
     } catch (error) {
       console.log(error);
-    } finally{
+    } finally {
       setRefreshingProjects(false);
     }
   };
@@ -266,7 +270,7 @@ const Overall_dashboard = () => {
       </View>
 
       {/* Employees */}
-      {(activeTab === "employees" && employees.length > 0) && (
+      {activeTab === "employees" && employees.length > 0 && (
         <View style={{ flex: 1 }}>
           <Text style={styles.sectionTitle}>🏆 Top Performing Employees</Text>
           <View style={styles.podiumContainer}>
@@ -304,10 +308,11 @@ const Overall_dashboard = () => {
               <Text style={styles.podiumText}>{employees[2]?.name}</Text>
             </View>
           </View>
+
           {employees.length > 0 && (
             <FlatList
               data={employees}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.employee_id}
               renderItem={renderEmployeeRow}
               contentContainerStyle={{ paddingBottom: 100, paddingTop: 15 }}
               refreshing={refreshingEmployees}

@@ -66,7 +66,7 @@ const ProjectCard = ({ project }) => {
 
       if (data.length >= 1 || userInfo.permission_key === "full") {
         router.navigate(
-          `/project_components/projectHandler?projectID=${projectID}&homeRoute=../../admin/adminHandler`
+          `/project_components/projectHandler?projectID=${projectID}&homeRoute=../../admin/adminHandler&userType=admin`
         );
       } else {
         setSelectedProjectID(projectID);

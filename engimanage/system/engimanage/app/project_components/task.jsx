@@ -43,7 +43,7 @@ const CustomCheckbox = ({ checked, onChange, show_checkBox }) => (
   </TouchableOpacity>
 );
 
-const Task = ({ projectID, homeRoute }) => {
+const Task = ({ projectID, homeRoute, userType }) => {
   const [userInfo, setUserinfo] = useState(null);
   const [TASKS, setTask] = useState(null);
   const [taskProgress, setTaskProgress] = useState({});
@@ -110,7 +110,7 @@ const Task = ({ projectID, homeRoute }) => {
   };
 
   const getUserInfo = async () => {
-    const data = await DataSecureStorage.getItem("loginData");
+    const data = await DataSecureStorage.getItem(userType === "admin" ? "adminLoginData" : "loginData");
     if (data) {
       const info = JSON.parse(data);
       setUserinfo(info);
@@ -384,7 +384,7 @@ const Task = ({ projectID, homeRoute }) => {
       ) : (
         <>
           {/* <Text style={styles.title}>Tasks</Text> */}
-          <View style={styles.progressContainer}>
+          {/* <View style={styles.progressContainer}>
             <Text style={styles.progressText}>
               {Math.round(totalProgress * 100)}% Complete
             </Text>
@@ -393,7 +393,7 @@ const Task = ({ projectID, homeRoute }) => {
               color="#4CAF50"
               style={styles.progressBar}
             />
-          </View>
+          </View> */}
 
           {(userInfo?.permission_key === "full" ||
             userInfo?.permission_key === "add_edit_update_delete") && (

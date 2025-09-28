@@ -19,7 +19,7 @@ import * as Clipboard from "expo-clipboard";
 import link from "../globals/globalScript";
 import CustomHeader from "../components/customHeader";
 
-const ManagementPage = ({ projectID, homeRoute }) => {
+const ManagementPage = ({ projectID, homeRoute, userType }) => {
   
   const [budget, setBudget] = useState(0);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
@@ -93,7 +93,7 @@ const ManagementPage = ({ projectID, homeRoute }) => {
   };
 
   const getuserInfo = async () => {
-    const data = await DataSecureStorage.getItem("loginData");
+    const data = await DataSecureStorage.getItem(userType === "admin" ? "adminLoginData" : "loginData");
     if (data) {
       const info = JSON.parse(data);
       

@@ -30,7 +30,7 @@ const CustomProgressBar = ({ progress }) => (
   </View>
 );
 
-const DashboardPage = ({projectID,homeRoute}) => {
+const DashboardPage = ({projectID,homeRoute,userType}) => {
   
   // const { projectID, homeRoute } = useLocalSearchParams();
 

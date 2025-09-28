@@ -9,14 +9,14 @@ import { router } from "expo-router";
 import Request from "./components/request";
 
 const link = globalScript;
-const Notif = ({ projectID, homeRoute }) => {
+const Notif = ({ projectID, homeRoute, userType }) => {
   // const { projectID } = useLocalSearchParams();
   const [notif, setNotif] = useState([]);
   const [employeeID, setEmployeeID] = useState(null);
 
   const fetchData = async () => {
     try {
-      const securedata = await DataSecureStorage.getItem("loginData");
+      const securedata = await DataSecureStorage.getItem(userType === "admin" ? "adminLoginData" : "loginData");
       const userData = JSON.parse(securedata);
       const empID = userData.ID;
 

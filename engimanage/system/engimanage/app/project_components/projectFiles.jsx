@@ -22,7 +22,7 @@ import CustomHeader from "../components/customHeader";
 
 const link = globalScript;
 
-const ProjectFiles = ({ projectID, homeRoute }) => {
+const ProjectFiles = ({ projectID, homeRoute, userType }) => {
   const [items, setItems] = useState([]);
   const [currentPath, setCurrentPath] = useState("");
   const [loading, setLoading] = useState(false);

@@ -517,7 +517,7 @@ app.post("/api/register", (req, res) => {
 
 // get all projects -------------------------------------------------->
 app.post("/api/getprojects", (req, res) => {
-  const sql = "SELECT * FROM projectstbl ORDER BY ID desc";
+  const sql = "SELECT * FROM projectstbl WHERE is_active = 0 ORDER BY ID desc";
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -635,7 +635,7 @@ app.post("/api/joinproject", (req, res) => {
     return res.status(400).json({ message: "Missing pin or employeeID" });
   }
 
-  const findProjectSql = "SELECT * FROM projectstbl WHERE pin = ?";
+  const findProjectSql = "SELECT * FROM projectstbl WHERE pin = ? AND is_active = 0";
   db.query(findProjectSql, [pin], (err, projectResults) => {
     if (err) {
       console.error(err);
@@ -1345,7 +1345,7 @@ app.post('/api/getprojectinfo', (req,res)=>{
   const { projectID } = req.body;
 
   try {
-    const query = "SELECT * FROM projectstbl WHERE ID = ?"
+    const query = "SELECT * FROM projectstbl WHERE ID = ? AND is_active = 0"
     db.query(query,[projectID],(err,result)=>{
       if(err){
         return res.status(500).json({ok:false,message:"error fetching data"})

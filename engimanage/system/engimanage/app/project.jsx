@@ -302,7 +302,7 @@ const Project = () => {
 
       if (data.length >= 1 || userPermission === "full") {
         router.navigate(
-          `/project_components/projectHandler?projectID=${projectID}&homeRoute=tabsHandler`
+          `/project_components/projectHandler?projectID=${projectID}&homeRoute=tabsHandler&userType=employee`
         );
       } else {
         setSelectedProjectID(projectID);

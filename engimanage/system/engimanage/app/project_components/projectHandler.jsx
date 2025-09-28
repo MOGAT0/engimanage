@@ -14,33 +14,33 @@ import ViewAssignedTasks from "./viewAssignedTasks";
 import Notif from "../notif";
 
 const Projects = ({route}) => {
-  const {projectID, homeRoute} = route.params;
-  return <DashboardPage projectID={projectID} homeRoute={homeRoute} />;
+  const {projectID, homeRoute,userType} = route.params;
+  return <DashboardPage projectID={projectID} homeRoute={homeRoute} userType={userType}/>;
 };
 
 const Management = ({route}) => {
-  const {projectID,homeRoute} = route.params;
-  return <ManagementPage projectID={projectID} homeRoute={homeRoute}/>;
+  const {projectID,homeRoute,userType} = route.params;
+  return <ManagementPage projectID={projectID} homeRoute={homeRoute} userType={userType}/>;
 };
 
 const Tasks = ({route})=>{
-  const {projectID,homeRoute} = route.params;
-    return <Task projectID={projectID} homeRoute={homeRoute}/>;
+  const {projectID,homeRoute,userType} = route.params;
+    return <Task projectID={projectID} homeRoute={homeRoute} userType={userType}/>;
 }
 
 const Tool = ({route})=>{
-  const {projectID,homeRoute} = route.params;
-    return <Tools projectID={projectID} homeRoute={homeRoute}/>;
+  const {projectID,homeRoute,userType} = route.params;
+    return <Tools projectID={projectID} homeRoute={homeRoute} userType={userType}/>;
 }
 
 const FilePage = ({route}) =>{
-  const {projectID,homeRoute} = route.params;
-  return <ProjectFiles projectID={projectID} homeRoute={homeRoute}/>;
+  const {projectID,homeRoute,userType} = route.params;
+  return <ProjectFiles projectID={projectID} homeRoute={homeRoute} userType={userType}/>;
 }
 
 const Notification = ({route}) => {
   const {projectID,homeRoute,userType} = route.params;
-  return <Notif projectID={projectID} homeRoute={homeRoute}/>;
+  return <Notif projectID={projectID} homeRoute={homeRoute} userType={userType}/>;
 }
 
 const Select = ({route}) => {
@@ -57,7 +57,7 @@ const AssignedTasks = ({route}) => {
 const Tab = createBottomTabNavigator();
 
 const ProjectHandler = () => {
-  const { initialTab,projectID,homeRoute } = useLocalSearchParams(); 
+  const { initialTab,projectID,homeRoute, userType } = useLocalSearchParams(); 
 
 
   return (
@@ -92,11 +92,11 @@ const ProjectHandler = () => {
           tabBarInactiveTintColor: "gray",
         })}
       >
-        <Tab.Screen name="dashboard" initialParams={{projectID,homeRoute}} component={Projects} options={{headerShown:false,title:"Dashboard"}}/>
-        <Tab.Screen name="management" initialParams={{projectID,homeRoute}} component={Management} options={{headerShown:false,title:"Management"}}/>
-        <Tab.Screen name="task" initialParams={{projectID,homeRoute}} component={Tasks} options={{headerShown:false,title:"Tasks"}}/>
+        <Tab.Screen name="dashboard" initialParams={{projectID,homeRoute,userType}} component={Projects} options={{headerShown:false,title:"Dashboard"}}/>
+        <Tab.Screen name="management" initialParams={{projectID,homeRoute,userType}} component={Management} options={{headerShown:false,title:"Management"}}/>
+        <Tab.Screen name="task" initialParams={{projectID,homeRoute,userType}} component={Tasks} options={{headerShown:false,title:"Tasks"}}/>
         {/* <Tab.Screen name="assignedtasks" initialParams={{projectID}} component={AssignedTasks} options={{headerShown:false,title:"Assigned Tasks"}}/> */}
-        <Tab.Screen name="projectfiles" initialParams={{projectID,homeRoute}} component={FilePage} options={{headerShown:false,title:"Files"}}/>
+        <Tab.Screen name="projectfiles" initialParams={{projectID,homeRoute,userType}} component={FilePage} options={{headerShown:false,title:"Files"}}/>
         {/* <Tab.Screen name="tools" initialParams={{projectID}} component={Tool} options={{headerShown:false,title:"Tools"}} /> */}
         <Tab.Screen name="notifications" initialParams={{projectID,homeRoute,userType}} component={Notification} options={{headerShown:false,title:"Notification"}} />
       </Tab.Navigator>
