@@ -300,14 +300,20 @@ const Project = () => {
 
       const data = await response.json();
 
-      if (data.length >= 1 || userPermission === "full") {
-        router.navigate(
-          `/project_components/projectHandler?projectID=${projectID}&homeRoute=tabsHandler&userType=employee`
-        );
-      } else {
-        setSelectedProjectID(projectID);
-        setJoinpopup(true);
+      if(userPermission !== "view"){
+        if (data.length >= 1 || userPermission === "full") {
+          router.navigate(
+            `/project_components/projectHandler?projectID=${projectID}&homeRoute=tabsHandler&userType=employee`
+          );
+        } else {
+          setSelectedProjectID(projectID);
+          setJoinpopup(true);
+        }
+      }else{
+        Toast.info("Unauthorized")
       }
+
+
     } catch (error) {
       console.error(error);
     }
@@ -349,7 +355,7 @@ const Project = () => {
 
   return (
     <View style={styles.container}>
-      <Containers position={"top"} duration={1500} style={{ width: "200" }} />
+      <Containers position={"top"} duration={1000} style={{ width: "250" }} />
 
       <Text style={styles.title}>Projects</Text>
 
@@ -403,7 +409,7 @@ const Project = () => {
       >
         {getFilteredProjects().map((project) => (
           <ProjectPanel
-            isViewer={userPermission === "view"}
+            
             key={project.ID}
             pmanager={project.projectManager.replace(/_/g, " ")}
             pname={project.projectName}
