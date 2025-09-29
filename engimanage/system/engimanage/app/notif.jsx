@@ -98,7 +98,7 @@ const Notif = ({ projectID, homeRoute, userType }) => {
   return (
     <ScrollView style={styles.container}>
       <CustomHeader
-        title={"Notifications"}
+        title={"Requests"}
         backName="Home"
         routePath={homeRoute}
       />

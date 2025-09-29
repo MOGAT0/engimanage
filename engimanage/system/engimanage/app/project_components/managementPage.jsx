@@ -18,9 +18,9 @@ import { useLocalSearchParams } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import link from "../globals/globalScript";
 import CustomHeader from "../components/customHeader";
+import ToggleSwitch from "../components/ToggleSwitch";
 
 const ManagementPage = ({ projectID, homeRoute, userType }) => {
-  
   const [budget, setBudget] = useState(0);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
 
@@ -37,12 +37,21 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
   const [availableMembers, setAvailableMembers] = useState([]);
 
   const [teamLeader, setTeamLeader] = useState("~team leader");
+  const [tlID, setTLID] = useState("");
 
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [roleSelectedMember, setRoleSelectedMember] = useState(null);
 
-  const [pinCode, setPinCode] = useState("");
+  const [userInfo, setUserInfo] = useState({});
 
+  const [TL_candidates, setTL_candidates] = useState([]);
+  const [selectedTL, setSelectedTL] = useState(null);
+  const [showselect_TL, setShowSelectTL] = useState(false);
+
+  const [pinCode, setPinCode] = useState("");
+  const [isProjectActive, setProjectActive] = useState(true);
+
+  // temp data
   const rolesList = [
     "project_manager",
     "finance_dept",
@@ -62,6 +71,29 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     getTeamLeader();
   }, []);
 
+  const get_tlcandidates = async () => {
+    try {
+      const response = await fetch(`${link.api_link}/get_teamleadercandidate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setTL_candidates(data.result);
+        setShowSelectTL(true);
+      } else {
+        console.log("no data");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // assign role to member ------------------------------------------>
   const handleAssignRole = async (memberID, role) => {
     try {
@@ -78,7 +110,6 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
       });
 
       const data = await response.json();
-      console.log(data);
 
       if (data.ok) {
         getcurrentprojectmembers();
@@ -93,11 +124,17 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
   };
 
   const getuserInfo = async () => {
-    const data = await DataSecureStorage.getItem(userType === "admin" ? "adminLoginData" : "loginData");
+    const data = await DataSecureStorage.getItem(
+      userType === "admin" ? "adminLoginData" : "loginData"
+    );
     if (data) {
       const info = JSON.parse(data);
-      
-      if (info.permission_key === "add_edit_update_delete" || info.permission_key === "full") {
+      setUserInfo(info);
+
+      if (
+        info.permission_key === "add_edit_update_delete" ||
+        info.permission_key === "full"
+      ) {
         setIsManager(true);
       }
     }
@@ -120,8 +157,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
       const data = await response.json();
 
       if (data.ok && data.result.length > 0) {
-        console.log(data);
-
+        setTLID(data.result[0].ID);
         setTeamLeader(`${data.result[0].fname} ${data.result[0].lname}`);
       }
     } catch (error) {
@@ -145,8 +181,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
       });
 
       const data = await response.json();
-      console.log(data);
-      
+
       if (data.ok) {
         setMembers(data.result);
       }
@@ -184,7 +219,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     if (selectedDate) {
       const formattedDate = selectedDate.toISOString().split("T")[0];
       setDeadline(new Date(formattedDate));
-      updateDeadline(formattedDate);
+      // updateDeadline(formattedDate);
     }
     setShowDatePicker(false);
   };
@@ -260,7 +295,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     setIsEditingBudget(false);
   };
 
-  // set ang sa useState (temp data) ------------------------------------------------->
+  // set ang sa useState (get project info) ------------------------------------------------->
   const updatebudget = async () => {
     try {
       const response = await fetch(`${link.api_link}/getprojectinfo`, {
@@ -274,9 +309,11 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
       const data = await response.json();
 
       if (data.ok) {
-        setBudget(data.result[0].budget);
+        // setBudget(data.result[0].budget);
         setProjectName(data.result[0].projectName);
         setPinCode(data.result[0].pin);
+
+        setProjectActive(data.result[0].is_active === 0);
       }
     } catch (error) {
       console.error(error);
@@ -349,7 +386,65 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     }
   };
 
-  const formattedDeadline = deadline.toISOString().split("T")[0];
+  // --------------
+  const assignTL = async () => {
+    if (!selectedTL) return;
+
+    try {
+      const res = await fetch(`${link.api_link}/assign_teamleader`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectID,
+          PM_ID: selectedTL.ID,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        setTeamLeader(
+          `${selectedTL.fname.replace(/_/g, " ")} ${selectedTL.lname.replace(
+            /_/g,
+            " "
+          )}`
+        );
+        setShowSelectTL(false);
+        setSelectedTL(null);
+      } else {
+        console.log("Failed to set team leader:", data.message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  // --------------
+
+  const handleToggleActive = async () => {
+    try {
+      // reverse current value (0 = active, 1 = inactive)
+      const newStatus = isProjectActive ? 1 : 0;
+
+      const response = await fetch(`${link.api_link}/update_project_status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectID,
+          is_active: newStatus,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        setProjectActive(!isProjectActive); // update UI
+      } else {
+        console.log("Failed to update project status:", data.message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // const formattedDeadline = deadline.toISOString().split("T")[0];
 
   return (
     <View style={styles.container}>
@@ -422,12 +517,23 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
         )}
       </View> */}
 
-        {/* Manager Section (update ni later) */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>👤 Team Leader</Text>
-          <Text style={styles.sectionContent}>
-            {teamLeader.replace(/_/g, " ")}
-          </Text>
+        <View
+          style={[
+            styles.card,
+            { flexDirection: "row", justifyContent: "space-between" },
+          ]}
+        >
+          <View>
+            <Text style={styles.sectionTitle}>👤 Team Leader</Text>
+            <Text style={styles.sectionContent}>
+              {teamLeader.replace(/_/g, " ")}
+            </Text>
+          </View>
+          {userInfo.permission_key === "full" && (
+            <TouchableOpacity onPress={get_tlcandidates}>
+              <Ionicons name="create-outline" size={28} color={"#007bffff"} />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Members Section */}
@@ -461,7 +567,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
                   <Ionicons name="settings-outline" size={22} color="#2980b9" />
                 </TouchableOpacity>
               )} */}
-              
+
               {isManager && (
                 <TouchableOpacity
                   onPress={() => {
@@ -501,6 +607,28 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
             </TouchableOpacity>
           )}
         </View>
+
+        {userInfo.permission_key === "full" && (
+          <View style={[styles.card, { flexDirection: "row" }]}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                marginVertical: "auto",
+              }}
+            >
+              Active:{" "}
+            </Text>
+            <TouchableOpacity onPress={handleToggleActive}>
+              <Ionicons
+                name={"toggle"}
+                size={35}
+                color={isProjectActive ? "#2ecc71" : "#FF6363"}
+                style={{ transform: [{ scaleX: isProjectActive ? 1 : -1 }] }}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Member Modal */}
         <Modal visible={showMemberModal} animationType="fade" transparent>
@@ -604,6 +732,61 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
                   onPress={() => {
                     setShowRoleModal(false);
                     setRoleSelectedMember(null);
+                  }}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Team Leader Selection Modal */}
+        <Modal visible={showselect_TL} animationType="fade" transparent>
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalCard}>
+              <Text>{}</Text>
+              <Text style={styles.modalTitle}>Select Team Leader</Text>
+
+              <ScrollView style={{ maxHeight: 300 }}>
+                {TL_candidates?.map((candidate) => {
+                  const isSelected = selectedTL
+                    ? selectedTL.ID === candidate.ID
+                    : tlID === candidate.ID;
+                  return (
+                    <TouchableOpacity
+                      key={candidate.ID}
+                      style={styles.checkboxRow}
+                      onPress={() => setSelectedTL(candidate)}
+                    >
+                      <Ionicons
+                        name={
+                          isSelected ? "radio-button-on" : "radio-button-off"
+                        }
+                        size={22}
+                        color="#2980b9"
+                      />
+                      <Text style={[styles.memberItem, { marginLeft: 10 }]}>
+                        {candidate.fname.replace(/_/g, " ")}{" "}
+                        {candidate.lname.replace(/_/g, " ")}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              <View style={styles.modalButtonRow}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={assignTL}
+                >
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setShowSelectTL(false);
+                    setSelectedTL(null);
                   }}
                 >
                   <Text style={styles.buttonText}>Cancel</Text>

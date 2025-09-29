@@ -230,7 +230,7 @@ const ManageRoles = () => {
                 </View>
               ) : (
                 <TouchableOpacity onPress={() => setExpanded(item.grantID)}>
-                  <Ionicons name="create-outline" size={28} color="#007bff" />
+                  <Ionicons name="create-outline" size={28} color="#aa2222" />
                 </TouchableOpacity>
               )}
             </View>
@@ -377,7 +377,7 @@ const ManageRoles = () => {
                         : "radio-button-off"
                     }
                     size={20}
-                    color={permissionID === p.permissionID ? "#007bff" : "#555"}
+                    color={permissionID === p.permissionID ? "#aa2222" : "#555"}
                     style={{ marginRight: 10 }}
                   />
                   <Text
@@ -415,6 +415,7 @@ const ManageRoles = () => {
           </View>
         </View>
       </Modal>
+      
     </View>
   );
 };
@@ -425,30 +426,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#393E46",
   },
   titleText: {
     marginTop: 20,
     marginBottom: 15,
     fontSize: 25,
     fontWeight: "bold",
+    color:"#c2c2c2"
   },
   addButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#aa2222",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 20,
   },
   addButtonText: {
-    color: "#fff",
+    color: "#c2c2c2",
     fontWeight: "bold",
   },
   roleCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#c2c2c2",
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,
@@ -473,14 +475,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
     padding: 20,
     borderRadius: 10,
     width: "80%",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#222831",
     padding: 15,
     marginBottom: 12,
     borderRadius: 8,
@@ -492,14 +494,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   saveButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: "#aa2222",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 10,
   },
   saveButtonText: {
-    color: "#fff",
+    color: "#c2c2c2",
     fontWeight: "bold",
   },
   cancelButton: {
@@ -509,11 +511,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButtonText: {
-    color: "#fff",
+    color: "#c2c2c2",
     fontWeight: "bold",
   },
   permissionModal: {
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
     padding: 20,
     borderRadius: 10,
     width: "80%",
@@ -529,9 +531,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#222831",
     borderRadius: 8,
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
   },
 
   permissionLabel: {
@@ -546,11 +548,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#393E46",
   },
 
   permissionOptionSelected: {
-    backgroundColor: "#f0f8ff",
+    backgroundColor: "#dbdbdbff",
   },
 
   permissionText: {
@@ -560,6 +562,6 @@ const styles = StyleSheet.create({
 
   permissionTextSelected: {
     fontWeight: "600",
-    color: "#007bff",
+    color: "#aa2222",
   },
 });

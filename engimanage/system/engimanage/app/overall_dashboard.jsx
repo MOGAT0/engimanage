@@ -26,6 +26,9 @@ const Overall_dashboard = () => {
   const [yourPosition, setYourPosition] = useState("~");
   const [userinfo, setUserinfo] = useState(null);
 
+
+  
+
   const renderEmployeeRow = ({ item, index }) => {
     let bgColor = "#fff";
     let medal = null;
@@ -229,6 +232,7 @@ const Overall_dashboard = () => {
       setRefreshingProjects(false);
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -360,7 +364,7 @@ const Overall_dashboard = () => {
       {/* Projects */}
       {activeTab === "projects" && (
         <View style={{ flex: 1 }}>
-          <Text style={styles.sectionTitle}>Top Performing Projects</Text>
+          <Text style={styles.sectionTitle}>Most Productive Projects</Text>
           <FlatList
             data={projects}
             keyExtractor={(item) => item.id}

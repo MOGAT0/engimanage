@@ -355,7 +355,7 @@ const Project = () => {
 
   return (
     <View style={styles.container}>
-      <Containers position={"top"} duration={1000} style={{ width: "250" }} />
+      <Containers position={"top"} duration={1000} style={{ width: "300" }} />
 
       <Text style={styles.title}>Projects</Text>
 

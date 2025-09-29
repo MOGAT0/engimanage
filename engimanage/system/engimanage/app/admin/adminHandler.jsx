@@ -70,8 +70,11 @@ const adminHandler = () => {
           },
           headerShown: false,
           tabBarShowLabel: true,
-          tabBarActiveTintColor: "#331177",
-          tabBarInactiveTintColor: "gray",
+          tabBarActiveTintColor: "#aa2222",
+          tabBarInactiveTintColor: "#c2c2c2",
+          tabBarStyle:{
+            backgroundColor: "#222831",
+          }
         })}
       >
         <Tab.Screen

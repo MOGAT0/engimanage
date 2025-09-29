@@ -39,9 +39,6 @@ const ProjectCard = ({ project }) => {
     if (data) {
       const info = JSON.parse(data);
       setUserInfo(info);
-      console.log("=========");
-      console.log(info);
-      console.log("=========");
     }
   };
 
@@ -140,7 +137,7 @@ const projectManagement = () => {
 
   const getProjects = async () => {
     try {
-      const response = await fetch(`${link.api_link}/getprojects`, {
+      const response = await fetch(`${link.api_link}/getprojects_adminflag`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -208,13 +205,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#393E46",
   },
   header: {
     fontSize: 25,
     fontWeight: "bold",
     marginBottom: 20,
     marginTop: 25,
+    color:"#c2c2c2"
   },
   searchContainer: {
     flexDirection: "row",
@@ -233,7 +231,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
     borderRadius: 10,
     padding: 15,
     marginBottom: 12,

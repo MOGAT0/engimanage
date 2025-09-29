@@ -149,7 +149,7 @@ const UserControl = () => {
           style={[
             styles.avatar,
             {
-              borderColor: item.is_deleted == 1 ? "red" : "lime",
+              borderColor: item.is_deleted == 1 ? "#aa2222" : "green",
             },
           ]}
         />
@@ -158,7 +158,7 @@ const UserControl = () => {
           style={[
             styles.avatar,
             {
-              borderColor: item.is_deleted == 1 ? "red" : "lime",
+              borderColor: item.is_deleted == 1 ? "#aa2222" : "green",
               justifyContent: "center",
               alignItems: "center",
             },
@@ -170,7 +170,7 @@ const UserControl = () => {
       <View style={{ flex: 1 }}>
         <Ionicons
           name="ellipse"
-          color={item.status === "active" ? "green" : "red"}
+          color={item.status === "active" ? "green" : "#aa2222"}
           size={15}
           style={styles.statusBadge}
         />
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#393E46",
   },
   searchContainer: {
     flexDirection: "row",
@@ -516,11 +516,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25,
     fontWeight: "bold",
+    color:"#c2c2c2"
   },
   addBtn: {
-    color: "white",
+    color: "#c2c2c2",
     fontWeight: "bold",
-    backgroundColor: "blue",
+    backgroundColor: "#aa2222",
     padding: 11,
     borderRadius: 50,
     paddingHorizontal: 20,
@@ -555,8 +556,8 @@ const styles = StyleSheet.create({
     marginTop: -5,
     borderWidth: 2,
     borderRadius: 100,
-    borderColor: "white",
-    backgroundColor: "white",
+    borderColor: "#393E46",
+    backgroundColor: "#393E46",
     width: 18,
     height: 19,
   },
@@ -567,7 +568,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0)",
   },
   optionsBox: {
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
     borderRadius: 8,
     padding: 15,
     width: 200,
@@ -596,7 +597,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#393E46",
     padding: 8,
     borderRadius: 5,
     marginVertical: 5,
@@ -636,7 +637,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   updateCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
     borderRadius: 12,
     padding: 20,
     width: "100%",
@@ -663,7 +664,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#393E46",
     borderRadius: 5,
     marginVertical: 5,
     paddingRight: 10,
@@ -680,21 +681,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#393E46",
     borderRadius: 5,
     padding: 10,
     marginTop: 5,
   },
   dropdownList: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#393E46",
     borderRadius: 5,
     marginTop: 5,
   },
   dropdownItem: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#393E46",
   },
   actionRow: {
     flexDirection: "row",
@@ -703,7 +704,7 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     flex: 1,
-    backgroundColor: "blue",
+    backgroundColor: "#03346E",
     padding: 12,
     borderRadius: 8,
     marginRight: 10,
@@ -711,7 +712,7 @@ const styles = StyleSheet.create({
   },
   cancelBtn: {
     flex: 1,
-    backgroundColor: "red",
+    backgroundColor: "#aa2222",
     padding: 12,
     borderRadius: 8,
     marginLeft: 10,

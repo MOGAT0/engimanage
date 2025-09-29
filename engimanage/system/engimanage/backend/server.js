@@ -535,6 +535,26 @@ app.post("/api/getprojects", (req, res) => {
   });
 });
 
+//  get from admin side --------------------------------------------->
+app.post("/api/getprojects_adminflag", (req, res) => {
+  const sql = "SELECT * FROM projectstbl ORDER BY ID desc";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching projects: ", err);
+      return res
+        .status(500)
+        .json({ message: "Server error fetching projects" });
+    }
+    
+    res.json({
+      ok: true,
+      projects: results
+    });
+
+  });
+});
+
 //check user membership -------------------------------------------------->
 app.post('/api/checkmembership', (req, res) => {
   const { userID, projectID } = req.body;
@@ -715,7 +735,65 @@ app.post("/api/joinproject", (req, res) => {
   });
 });
 
-// get team leader
+// get all candidates for team leaader ------------------------------------------------------->
+app.post('/api/get_teamleadercandidate',(req,res)=>{
+  try {
+    const query = `
+      SELECT u.*,p.permission_key
+      FROM users u
+      JOIN accessgrant ag ON u.access_level = ag.grantID
+      JOIN permissions p ON ag.permission_key = p.permissionID
+      WHERE p.permission_key = 'full' or p.permission_key = "add_edit_update_delete";
+    `;
+
+    db.query(query,(err,result)=>{
+      if(err){
+        res.status(500).json({ok:false, message:err})
+      }
+      res.json({ok:true, message: "Success", result})
+    })
+  } catch (error) {
+    res.status(500).json({ok:false, message:error})
+  }
+})
+
+app.post('/api/assign_teamleader', (req, res) => {
+  const { PM_ID, projectID } = req.body;
+
+  if (!PM_ID || !projectID) {
+    return res.status(400).json({ ok: false, message: "PM_ID and projectID are required" });
+  }
+
+  try {
+    const get_fname = `SELECT fname FROM users WHERE ID = ?`;
+    db.query(get_fname, [PM_ID], (err, results) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: "Error fetching fname", error: err });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ ok: false, message: "User not found" });
+      }
+
+      const fname = results[0].fname;
+
+      const update = `UPDATE projectstbl SET projectManager = ?, PM_ID = ? WHERE ID = ?`;
+      db.query(update, [fname, PM_ID, projectID], (err2, updateResult) => {
+        if (err2) {
+          return res.status(500).json({ ok: false, message: "Error updating project", error: err2 });
+        }
+
+        res.json({ ok: true, message: "Team Leader assigned successfully", data: updateResult });
+      });
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: error.message });
+  }
+});
+
+
+
+// get team leader ------------------------------------------------------->
 app.post('/api/teamleader',(req,res)=>{
   const {projectID} = req.body
 
@@ -1345,7 +1423,7 @@ app.post('/api/getprojectinfo', (req,res)=>{
   const { projectID } = req.body;
 
   try {
-    const query = "SELECT * FROM projectstbl WHERE ID = ? AND is_active = 0"
+    const query = "SELECT * FROM projectstbl WHERE ID = ?"
     db.query(query,[projectID],(err,result)=>{
       if(err){
         return res.status(500).json({ok:false,message:"error fetching data"})
@@ -1356,6 +1434,39 @@ app.post('/api/getprojectinfo', (req,res)=>{
     console.error(error);
   }
 })
+
+
+// Update project active status ------------------------------------------->
+app.post('/api/update_project_status', (req, res) => {
+  const { projectID, is_active } = req.body;
+
+  console.log(is_active);
+  
+
+  if (!projectID || is_active === undefined) {
+    return res.status(400).json({ ok: false, message: "Missing projectID or is_active" });
+  }
+
+  const query = `
+    UPDATE projectstbl 
+    SET is_active = ? 
+    WHERE ID = ?
+  `;
+
+  db.query(query, [is_active, projectID], (err, result) => {
+    if (err) {
+      console.error("Error updating project status:", err);
+      return res.status(500).json({ ok: false, message: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ ok: false, message: "Project not found" });
+    }
+
+    res.json({ ok: true, message: "Project status updated successfully" });
+  });
+});
+
 
 
 // DELETE members --------------------------------------------------------------------------------------
