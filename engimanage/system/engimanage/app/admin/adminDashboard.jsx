@@ -1,131 +1,197 @@
 import { StyleSheet, Text, View, ScrollView, Dimensions } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PieChart, BarChart } from "react-native-chart-kit";
+import globalScript from "../globals/globalScript";
 
+const link = globalScript;
 const screenWidth = Dimensions.get("window").width;
 
+const getRandomColor = () =>
+  "#" +
+  Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, "0");
+
 const adminDashboard = () => {
-  // Mock data for charts
+  const [projectInfoCounts, setProjectInfoCounts] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch_projectInfoCounts();
+  }, []);
+
   const taskData = [
     {
-      name: "Completed",
-      population: 42,
+      name: "Completed Tasks",
+      population: projectInfoCounts?.completed_tasks_count || 0,
       color: "#00ADB5",
       legendFontColor: "#EEEEEE",
       legendFontSize: 12,
     },
     {
-      name: "Overdue",
-      population: 3,
+      name: "Unassigned Tasks",
+      population: projectInfoCounts?.unassigned_task_count || 0,
       color: "#FF5722",
       legendFontColor: "#EEEEEE",
       legendFontSize: 12,
     },
     {
-      name: "In Progress",
-      population: 15,
+      name: "In Progress Tasks",
+      population: projectInfoCounts?.inprogress_task_count || 0,
       color: "#FFD369",
       legendFontColor: "#EEEEEE",
       legendFontSize: 12,
     },
   ];
 
-  // Projects list (id, full name, completed tasks, color for legend)
-  const projects = [
-    { id: "P1", name: "House & Lot", completed: 12, color: "#4ECCA3" },
-    { id: "P2", name: "Apartment Complex", completed: 8, color: "#00ADB5" },
-    { id: "P3", name: "Office Building", completed: 15, color: "#FFD369" },
-    { id: "P4", name: "Warehouse", completed: 5, color: "#FF5722" },
+  const rawProjects = [
+    { id: "34", name: "House & Lot", completed: 12 },
+    { id: "P2", name: "Apartment Complex", completed: 8 },
   ];
 
-  // Bar chart data uses the short IDs as labels and completed counts as values
+  const projects = rawProjects.map((p) => ({
+    ...p,
+    color: getRandomColor(),
+  }));
+
   const progressData = {
-    labels: projects.map((p) => p.id), // ["P1", "P2", ...]
+    labels: projects.map((p) => p.id),
     datasets: [
       {
-        data: projects.map((p) => p.completed), // [12, 8, 15, 5]
+        data: projects.map((p) => p.completed),
       },
     ],
   };
 
+  const fetch_projectInfoCounts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${link.api_link}/projectstatus_count`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setProjectInfoCounts(data.result[0]);
+      } else {
+        console.log("No Data");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <Text style={styles.header}>Admin Dashboard</Text>
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <Text style={styles.header}>Admin Dashboard</Text>
 
-      {/* Overview Cards */}
-      <View style={styles.cardRow}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Total Projects</Text>
-          <Text style={styles.cardValue}>12</Text>
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Active Users</Text>
-          <Text style={styles.cardValue}>34</Text>
-        </View>
-      </View>
+        {/* Overview Cards */}
 
-      <View style={styles.cardRow}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Completed Tasks</Text>
-          <Text style={styles.cardValue}>42</Text>
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Overdue Tasks</Text>
-          <Text style={styles.cardValue}>3</Text>
-        </View>
-      </View>
+        {loading ? (
+          <Text style={{ color: "#fff" }}>Loading...</Text>
+        ) : projectInfoCounts ? (
+          <>
+            <View style={styles.cardRow}>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Total Projects</Text>
+                <Text style={styles.cardValue}>
+                  {projectInfoCounts?.total_projects_count || "~"}
+                </Text>
+              </View>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Completed Projects</Text>
+                <Text style={styles.cardValue}>
+                  {projectInfoCounts?.completed_projects_count || "~"}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.cardRow}>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Active Projects</Text>
+                <Text style={styles.cardValue}>
+                  {projectInfoCounts?.active_projects_count || "~"}
+                </Text>
+              </View>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Total Tasks</Text>
+                <Text style={styles.cardValue}>
+                  {projectInfoCounts?.total_task || "~"}
+                </Text>
+              </View>
+            </View>
+          </>
+        ) : (
+          <Text style={{ color: "#f00" }}>No Data Available</Text>
+        )}
 
-      {/* Pie Chart */}
-      <Text style={styles.sectionTitle}>Task Distribution</Text>
-      <PieChart
-        data={taskData}
-        width={screenWidth - 32}
-        height={220}
-        chartConfig={chartConfig}
-        accessor={"population"}
-        backgroundColor={"transparent"}
-        paddingLeft={"16"}
-        absolute
-      />
+        {/* Pie Chart */}
+        <Text style={styles.sectionTitle}>Task Distribution</Text>
+        <PieChart
+          data={taskData}
+          width={screenWidth - 32}
+          height={220}
+          chartConfig={chartConfig}
+          accessor={"population"}
+          backgroundColor={"transparent"}
+          paddingLeft={"16"}
+          absolute
+        />
 
-      {/* Bar Chart with Project IDs */}
-      <Text style={styles.sectionTitle}>Project Progress (Completed Tasks)</Text>
-      <BarChart
-        data={progressData}
-        width={screenWidth - 32}
-        height={240}
-        chartConfig={chartConfig}
-        style={{ borderRadius: 12 }}
-        fromZero
-        showValuesOnTopOfBars
-        verticalLabelRotation={0} // labels are short (P1,P2) so rotation unnecessary
-      />
+        {/* Bar Chart with Project IDs */}
+        <Text style={styles.sectionTitle}>
+          Project Progress (Completed Tasks)
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <BarChart
+            data={progressData}
+            width={Math.max(screenWidth - 32, projects.length * 80)}
+            height={240}
+            chartConfig={chartConfig}
+            style={{ borderRadius: 12 }}
+            fromZero
+            showValuesOnTopOfBars
+            verticalLabelRotation={45}
+          />
+        </ScrollView>
 
-      {/* Legend mapping project IDs -> full names */}
-      <View style={styles.legendContainer}>
-        {projects.map((p) => (
-          <View style={styles.legendItem} key={p.id}>
-            <View style={[styles.legendColorBox, { backgroundColor: p.color }]} />
-            <Text style={styles.legendText}>
-              {p.id} — {p.name}
-            </Text>
+        {/* Legend mapping project IDs -> full names */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.legendContainer}>
+            {projects.map((p) => (
+              <View style={styles.legendItem} key={p.id}>
+                <View
+                  style={[styles.legendColorBox, { backgroundColor: p.color }]}
+                />
+                <Text style={styles.legendText}>
+                  {p.id} — {p.name}
+                </Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </ScrollView>
 
-      {/* Recent Activity */}
-      <Text style={styles.sectionTitle}>Recent Activity</Text>
-      <View style={styles.listItem}>
-        <Text style={styles.listText}>✔ Task completed by John</Text>
-      </View>
-      <View style={styles.listItem}>
-        <Text style={styles.listText}>⚠ Project Beta deadline in 3 days</Text>
-      </View>
-      <View style={styles.listItem}>
-        <Text style={styles.listText}>+ New user added: Maria</Text>
-      </View>
-    </ScrollView>
+        {/* Recent Activity */}
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <View style={styles.listItem}>
+          <Text style={styles.listText}>✔ Task completed by John</Text>
+        </View>
+        <View style={styles.listItem}>
+          <Text style={styles.listText}>⚠ Project Beta deadline in 3 days</Text>
+        </View>
+        <View style={styles.listItem}>
+          <Text style={styles.listText}>+ New user added: Maria</Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -152,6 +218,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#EEEEEE",
     marginBottom: 16,
+    marginTop: 20,
   },
   cardRow: {
     flexDirection: "row",
@@ -199,24 +266,23 @@ const styles = StyleSheet.create({
   /* Legend styles */
   legendContainer: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 8,
-    marginBottom: 6,
+    alignItems: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 5,
   },
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 14,
-    marginBottom: 8,
+    marginRight: 16,
   },
   legendColorBox: {
-    width: 12,
-    height: 12,
-    borderRadius: 3,
+    width: 16,
+    height: 16,
+    borderRadius: 4,
     marginRight: 8,
   },
   legendText: {
-    color: "#EEEEEE",
-    fontSize: 13,
+    fontSize: 14,
+    color: "#fff",
   },
 });

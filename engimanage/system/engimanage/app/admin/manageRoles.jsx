@@ -426,71 +426,79 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#393E46",
+    backgroundColor: "#393E46", // keep base dark bg
   },
   titleText: {
     marginTop: 20,
     marginBottom: 15,
     fontSize: 25,
     fontWeight: "bold",
-    color:"#c2c2c2"
+    color: "#EEEEEE", // brighter white for headings
   },
   addButton: {
     backgroundColor: "#aa2222",
-    padding: 12,
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 10,
     alignItems: "center",
     marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 4,
+    elevation: 5,
   },
   addButtonText: {
-    color: "#c2c2c2",
+    color: "#EEEEEE",
     fontWeight: "bold",
+    fontSize: 16,
   },
   roleCard: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#c2c2c2",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
+    alignItems: "flex-start",
+    backgroundColor: "#222831", // dark card
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#444", // subtle border
   },
-  roleText: { fontSize: 16, marginBottom: 4 },
-  bold: { fontWeight: "bold" },
+  roleText: { 
+    fontSize: 15, 
+    marginBottom: 6, 
+    color: "#EEEEEE" // readable on dark
+  },
+  bold: { fontWeight: "bold", color: "#FFD369" }, // highlight bold parts
   actionGroup: { flexDirection: "row" },
   actionButton: {
-    backgroundColor: "#007bff",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    backgroundColor: "#00ADB5",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 6,
     marginLeft: 6,
   },
-  actionText: { color: "#fff" },
+  actionText: { color: "#EEEEEE", fontWeight: "600" },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   modalContent: {
-    backgroundColor: "#c2c2c2",
+    backgroundColor: "#222831",
     padding: 20,
-    borderRadius: 10,
-    width: "80%",
+    borderRadius: 12,
+    width: "85%",
+    borderWidth: 1,
+    borderColor: "#444",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#222831",
-    padding: 15,
-    marginBottom: 12,
-    borderRadius: 8,
-  },
-  permissionBtn: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    marginBottom: 12,
+    borderColor: "#555",
+    backgroundColor: "#2d2d2d",
+    color: "#EEEEEE",
+    padding: 12,
+    marginBottom: 14,
     borderRadius: 8,
   },
   saveButton: {
@@ -501,7 +509,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   saveButtonText: {
-    color: "#c2c2c2",
+    color: "#EEEEEE",
     fontWeight: "bold",
   },
   cancelButton: {
@@ -511,57 +519,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButtonText: {
-    color: "#c2c2c2",
+    color: "#EEEEEE",
     fontWeight: "bold",
-  },
-  permissionModal: {
-    backgroundColor: "#c2c2c2",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
-    maxHeight: "60%",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   permissionContainer: {
     marginBottom: 20,
     padding: 10,
     borderWidth: 1,
-    borderColor: "#222831",
+    borderColor: "#555",
     borderRadius: 8,
-    backgroundColor: "#c2c2c2",
+    backgroundColor: "#2d2d2d",
   },
-
   permissionLabel: {
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 8,
-    color: "#333",
+    color: "#FFD369",
   },
-
   permissionOption: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#393E46",
+    borderBottomColor: "#444",
   },
-
   permissionOptionSelected: {
-    backgroundColor: "#dbdbdbff",
+    backgroundColor: "#393E46",
+    borderRadius: 6,
   },
-
   permissionText: {
     fontSize: 14,
-    color: "#555",
+    color: "#EEEEEE",
   },
-
   permissionTextSelected: {
     fontWeight: "600",
-    color: "#aa2222",
+    color: "#00ADB5",
   },
 });

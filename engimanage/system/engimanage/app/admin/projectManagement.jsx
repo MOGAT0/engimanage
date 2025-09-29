@@ -200,54 +200,58 @@ const projectManagement = () => {
 
 export default projectManagement;
 
-// ----- Styles -----
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#393E46",
+    backgroundColor: "#393E46", // dark background
   },
   header: {
     fontSize: 25,
     fontWeight: "bold",
     marginBottom: 20,
     marginTop: 25,
-    color:"#c2c2c2"
+    color: "#EEEEEE", // brighter for contrast
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#dce9dc",
+    backgroundColor: "#222831", // dark search bar
     borderRadius: 10,
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
     marginBottom: 16,
-    paddingVertical: 5,
-    elevation: 3,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "#444", // subtle border
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     paddingVertical: 8,
-    color: "#333",
+    color: "#EEEEEE",
   },
   card: {
-    backgroundColor: "#c2c2c2",
+    backgroundColor: "#222831", // dark card
     borderRadius: 10,
     padding: 15,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#444",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
     elevation: 3,
   },
   projectName: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,
+    color: "#FFD369", // highlight project name
   },
   projectDesc: {
     fontSize: 14,
-    color: "#666",
+    color: "#EEEEEE",
     marginBottom: 8,
   },
   memberRow: {
@@ -257,6 +261,7 @@ const styles = StyleSheet.create({
   memberCount: {
     marginLeft: 5,
     fontSize: 14,
-    color: "#333",
+    color: "#AAAAAA", // softer gray for secondary info
   },
 });
+

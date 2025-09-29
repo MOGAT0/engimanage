@@ -491,7 +491,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    position: "relative",
     height: 40,
     borderRadius: 8,
     backgroundColor: "#D9E8D8",
@@ -516,7 +515,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25,
     fontWeight: "bold",
-    color:"#c2c2c2"
+    color: "#c2c2c2",
   },
   addBtn: {
     color: "#c2c2c2",
@@ -540,15 +539,15 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderWidth: 2,
     overflow: "hidden",
-    borderColor: "#c2c2c2",
   },
   name: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#c2c2c2",
   },
   role: {
     fontSize: 14,
-    color: "gray",
+    color: "#aaaaaa",
   },
   statusBadge: {
     position: "absolute",
@@ -556,8 +555,8 @@ const styles = StyleSheet.create({
     marginTop: -5,
     borderWidth: 2,
     borderRadius: 100,
+    backgroundColor:"#393E46",
     borderColor: "#393E46",
-    backgroundColor: "#393E46",
     width: 18,
     height: 19,
   },
@@ -565,13 +564,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0)",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   optionsBox: {
     backgroundColor: "#c2c2c2",
     borderRadius: 8,
     padding: 15,
     width: 200,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   optionBtn: {
     flexDirection: "row",
@@ -581,6 +585,7 @@ const styles = StyleSheet.create({
   optionText: {
     marginLeft: 10,
     fontSize: 16,
+    color: "#0d0c22",
   },
   confirmBox: {
     flex: 1,
@@ -590,7 +595,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   confirmInner: {
-    backgroundColor: "#fff",
+    backgroundColor: "#c2c2c2",
     padding: 20,
     borderRadius: 8,
     width: "80%",
@@ -602,32 +607,30 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 5,
     width: "100%",
+    backgroundColor: "#fff",
   },
-  passwordRow: {
+  label: {
+    marginTop: 10,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0d0c22",
+  },
+  passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  roleOption: {
-    padding: 8,
     borderWidth: 1,
-    borderColor: "#ccc",
-    marginVertical: 3,
+    borderColor: "#393E46",
     borderRadius: 5,
-  },
-  modalContent: {
-    flex: 1,
-    padding: 20,
-  },
-  optionsBox: {
+    marginVertical: 5,
+    paddingRight: 10,
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    width: 150,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 8,
+  },
+  eyeIcon: {
+    padding: 5,
   },
   updateOverlay: {
     flex: 1,
@@ -649,32 +652,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15,
     textAlign: "center",
-  },
-  subtitle: {
-    color: "#c2c2c2",
-    fontSize: 15,
-    textAlign: "center",
-  },
-  label: {
-    marginTop: 10,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#393E46",
-    borderRadius: 5,
-    marginVertical: 5,
-    paddingRight: 10,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 8,
-  },
-  eyeIcon: {
-    padding: 5,
+    color: "#0d0c22",
   },
   dropdown: {
     flexDirection: "row",
@@ -685,17 +663,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginTop: 5,
+    backgroundColor: "#fff",
   },
   dropdownList: {
     borderWidth: 1,
     borderColor: "#393E46",
     borderRadius: 5,
     marginTop: 5,
+    backgroundColor: "#fff",
   },
   dropdownItem: {
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#393E46",
   },
   actionRow: {
     flexDirection: "row",
@@ -704,22 +682,23 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     flex: 1,
-    backgroundColor: "#03346E",
-    padding: 12,
+    backgroundColor: "green",
+    padding: 10,
     borderRadius: 8,
-    marginRight: 10,
+    marginRight: 5,
     alignItems: "center",
   },
   cancelBtn: {
     flex: 1,
     backgroundColor: "#aa2222",
-    padding: 12,
+    padding: 10,
     borderRadius: 8,
-    marginLeft: 10,
+    marginLeft: 5,
     alignItems: "center",
   },
   btnText: {
-    color: "white",
+    color: "#fff",
     fontWeight: "bold",
   },
 });
+

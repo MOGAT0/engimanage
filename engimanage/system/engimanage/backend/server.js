@@ -2714,6 +2714,44 @@ app.post('/api/get_projectRanking', (req, res) => {
   }
 });
 
+app.post('/api/projectstatus_count',(req,res)=>{
+  try {
+    const query = `
+      SELECT
+          (SELECT COUNT(*) FROM tasks) AS total_task,
+          (SELECT COUNT(*) FROM projectstbl) AS total_projects_count,
+          (SELECT COUNT(*) FROM projectstbl WHERE is_active = 0) AS active_projects_count,
+          (SELECT COUNT(*) FROM tasks WHERE progress = 100) AS completed_tasks_count,
+          (SELECT COUNT(*) FROM tasks WHERE assign_status = 'available') AS unassigned_task_count,
+          (SELECT COUNT(*) FROM tasks WHERE assign_status = 'assigned' AND progress != 100) AS inprogress_task_count,
+          (
+              SELECT COUNT(*) 
+              FROM (
+                  SELECT 
+                      t.projectID,
+                      COUNT(*) AS total_tasks,
+                      SUM(CASE WHEN t.progress = 100 THEN 1 ELSE 0 END) AS completed_tasks
+                  FROM tasks t
+                  GROUP BY t.projectID
+                  HAVING COUNT(*) > 0 
+                    AND SUM(CASE WHEN t.progress = 100 THEN 1 ELSE 0 END) = COUNT(*)
+              ) completed_projects
+          ) AS completed_projects_count;
+
+    `;
+
+    db.query(query,(err,result)=>{
+      if(err){
+        res.status(500).json({ok:false,message:err})
+      }
+
+      res.json({ok:true,message:"success",result})
+    })
+  } catch (error) {
+    res.status(500).json({ok:false, message:error})
+  }
+})
+
 // para sa port connection--------------------------------------------->
 
 app.listen(port, () => {
