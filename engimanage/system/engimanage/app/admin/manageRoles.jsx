@@ -190,18 +190,25 @@ const ManageRoles = () => {
           <TouchableOpacity activeOpacity={1} onPress={() => setExpanded(null)}>
             <View style={styles.roleCard}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.roleText}>
-                  <Text style={styles.bold}>Role:</Text>{" "}
-                  {item.role_name.replace(/_/g, " ")}
-                </Text>
-                <Text style={styles.roleText}>
-                  <Text style={styles.bold}>Permission:</Text>{" "}
-                  {item.permission_key.replace(/_/g,"/")}
-                </Text>
+                {item.role_name && (
+                  <Text style={styles.roleText}>
+                    <Text style={styles.bold}>Role:</Text>{" "}
+                    {item.role_name.replace(/_/g, " ")}
+                  </Text>
+                )}
 
-                <Text style={styles.roleText}>
-                  <Text style={styles.bold}>Description:</Text> {item.notes}
-                </Text>
+                {item.permission_key && (
+                  <Text style={styles.roleText}>
+                    <Text style={styles.bold}>Permission:</Text>{" "}
+                    {item.permission_key.replace(/_/g, "/")}
+                  </Text>
+                )}
+
+                {item.notes && (
+                  <Text style={styles.roleText}>
+                    <Text style={styles.bold}>Description:</Text> {item.notes}
+                  </Text>
+                )}
               </View>
 
               {expanded === item.grantID ? (
@@ -214,9 +221,8 @@ const ManageRoles = () => {
                       setRoleName(item.role_name.replace(/_/g, " "));
                       setPermissionKey(item.permission_key);
                       setNote(item.notes);
-                      setPermissionID(item.permissionID)
+                      setPermissionID(item.permissionID);
                       console.log(item);
-                      
                     }}
                   >
                     <Text style={styles.actionText}>Edit</Text>
@@ -415,7 +421,6 @@ const ManageRoles = () => {
           </View>
         </View>
       </Modal>
-      
     </View>
   );
 };
@@ -463,10 +468,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#444", // subtle border
   },
-  roleText: { 
-    fontSize: 15, 
-    marginBottom: 6, 
-    color: "#EEEEEE" // readable on dark
+  roleText: {
+    fontSize: 15,
+    marginBottom: 6,
+    color: "#EEEEEE", // readable on dark
   },
   bold: { fontWeight: "bold", color: "#FFD369" }, // highlight bold parts
   actionGroup: { flexDirection: "row" },
