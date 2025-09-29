@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, ScrollView, Dimensions } from "react-native";
 import React from "react";
-import { PieChart, LineChart } from "react-native-chart-kit";
+import { PieChart, BarChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -30,21 +30,22 @@ const adminDashboard = () => {
     },
   ];
 
+  // Projects list (id, full name, completed tasks, color for legend)
+  const projects = [
+    { id: "P1", name: "House & Lot", completed: 12, color: "#4ECCA3" },
+    { id: "P2", name: "Apartment Complex", completed: 8, color: "#00ADB5" },
+    { id: "P3", name: "Office Building", completed: 15, color: "#FFD369" },
+    { id: "P4", name: "Warehouse", completed: 5, color: "#FF5722" },
+  ];
+
+  // Bar chart data uses the short IDs as labels and completed counts as values
   const progressData = {
-    labels: [
-      "House & Lot",
-      "Apartment Complex",
-      "Office Building",
-      "Warehouse",
-    ],
+    labels: projects.map((p) => p.id), // ["P1", "P2", ...]
     datasets: [
       {
-        data: [12, 8, 15, 5], // number of completed tasks per project
-        color: (opacity = 1) => `rgba(0, 173, 181, ${opacity})`,
-        strokeWidth: 2,
+        data: projects.map((p) => p.completed), // [12, 8, 15, 5]
       },
     ],
-    legend: ["Completed Tasks per Project"],
   };
 
   return (
@@ -88,16 +89,30 @@ const adminDashboard = () => {
         absolute
       />
 
-      {/* Line Chart */}
-      <Text style={styles.sectionTitle}>Project Progress Trend</Text>
-      <LineChart
+      {/* Bar Chart with Project IDs */}
+      <Text style={styles.sectionTitle}>Project Progress (Completed Tasks)</Text>
+      <BarChart
         data={progressData}
-        width={screenWidth}
-        height={220}
+        width={screenWidth - 32}
+        height={240}
         chartConfig={chartConfig}
-        bezier
         style={{ borderRadius: 12 }}
+        fromZero
+        showValuesOnTopOfBars
+        verticalLabelRotation={0} // labels are short (P1,P2) so rotation unnecessary
       />
+
+      {/* Legend mapping project IDs -> full names */}
+      <View style={styles.legendContainer}>
+        {projects.map((p) => (
+          <View style={styles.legendItem} key={p.id}>
+            <View style={[styles.legendColorBox, { backgroundColor: p.color }]} />
+            <Text style={styles.legendText}>
+              {p.id} — {p.name}
+            </Text>
+          </View>
+        ))}
+      </View>
 
       {/* Recent Activity */}
       <Text style={styles.sectionTitle}>Recent Activity</Text>
@@ -179,5 +194,29 @@ const styles = StyleSheet.create({
   listText: {
     color: "#EEEEEE",
     fontSize: 14,
+  },
+
+  /* Legend styles */
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 14,
+    marginBottom: 8,
+  },
+  legendColorBox: {
+    width: 12,
+    height: 12,
+    borderRadius: 3,
+    marginRight: 8,
+  },
+  legendText: {
+    color: "#EEEEEE",
+    fontSize: 13,
   },
 });
