@@ -2742,7 +2742,7 @@ app.post('/api/projectstatus_count',(req,res)=>{
 
     db.query(query,(err,result)=>{
       if(err){
-        res.status(500).json({ok:false,message:err})
+        return res.status(500).json({ok:false,message:err})
       }
 
       res.json({ok:true,message:"success",result})
@@ -2751,6 +2751,36 @@ app.post('/api/projectstatus_count',(req,res)=>{
     res.status(500).json({ok:false, message:error})
   }
 })
+
+// get project status for graph ------------------------------------------------------->
+app.post('/api/getProjectGraphStatus',(req,res)=>{
+  try {
+    const query = `
+      SELECT
+        p.ID as id,
+        p.projectName as name,
+          COUNT(t.progress) AS completed
+      FROM
+          tasks t
+      LEFT JOIN projectstbl p ON p.ID = t.projectID
+      WHERE
+          t.progress = 100
+      GROUP BY
+          t.projectID
+    `;
+
+    db.query(query,(err,result)=>{
+      if(err){
+        return res.status(500).json({ok:false,message:err})
+      }
+
+      res.json({ok:true, message:"Success", result})
+    })
+  } catch (error) {
+    res.status(500).json({ok:false,message:error})
+  }
+})
+
 
 // para sa port connection--------------------------------------------->
 

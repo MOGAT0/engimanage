@@ -16,8 +16,26 @@ const adminDashboard = () => {
   const [projectInfoCounts, setProjectInfoCounts] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [rawProjects, setRawProjects] = useState([]);
+
+  const projects = rawProjects.map((p) => ({
+    ...p,
+    color: getRandomColor(),
+  }));
+  const progressData = {
+    labels: projects.map((p) => p.id),
+    datasets: [
+      {
+        data: projects.map((p) => p.completed),
+      },
+    ],
+  };
+
   useEffect(() => {
-    fetch_projectInfoCounts();
+    if (loading) {
+      fetch_projectInfoCounts();
+      get_projectGraphInfo();
+    }
   }, []);
 
   const taskData = [
@@ -44,25 +62,6 @@ const adminDashboard = () => {
     },
   ];
 
-  const rawProjects = [
-    { id: "34", name: "House & Lot", completed: 12 },
-    { id: "P2", name: "Apartment Complex", completed: 8 },
-  ];
-
-  const projects = rawProjects.map((p) => ({
-    ...p,
-    color: getRandomColor(),
-  }));
-
-  const progressData = {
-    labels: projects.map((p) => p.id),
-    datasets: [
-      {
-        data: projects.map((p) => p.completed),
-      },
-    ],
-  };
-
   const fetch_projectInfoCounts = async () => {
     try {
       setLoading(true);
@@ -88,18 +87,45 @@ const adminDashboard = () => {
     }
   };
 
+  const get_projectGraphInfo = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${link.api_link}/getProjectGraphStatus`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        console.log(data.result);
+        setRawProjects(data.result);
+      } else {
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <Text style={styles.header}>Admin Dashboard</Text>
 
-        {/* Overview Cards */}
-
         {loading ? (
-          <Text style={{ color: "#fff" }}>Loading...</Text>
-        ) : projectInfoCounts ? (
+          <View>
+            <Text>Loading...</Text>
+          </View>
+        ) : (
           <>
+            {/* Overview Cards */}
             <View style={styles.cardRow}>
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>Total Projects</Text>
@@ -128,68 +154,71 @@ const adminDashboard = () => {
                 </Text>
               </View>
             </View>
-          </>
-        ) : (
-          <Text style={{ color: "#f00" }}>No Data Available</Text>
-        )}
 
-        {/* Pie Chart */}
-        <Text style={styles.sectionTitle}>Task Distribution</Text>
-        <PieChart
-          data={taskData}
-          width={screenWidth - 32}
-          height={220}
-          chartConfig={chartConfig}
-          accessor={"population"}
-          backgroundColor={"transparent"}
-          paddingLeft={"16"}
-          absolute
-        />
+            {/* Pie Chart */}
+            <Text style={styles.sectionTitle}>Task Distribution</Text>
+            <PieChart
+              data={taskData}
+              width={screenWidth - 32}
+              height={220}
+              chartConfig={chartConfig}
+              accessor={"population"}
+              backgroundColor={"transparent"}
+              paddingLeft={"16"}
+              absolute
+            />
 
-        {/* Bar Chart with Project IDs */}
-        <Text style={styles.sectionTitle}>
-          Project Progress (Completed Tasks)
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <BarChart
-            data={progressData}
-            width={Math.max(screenWidth - 32, projects.length * 80)}
-            height={240}
-            chartConfig={chartConfig}
-            style={{ borderRadius: 12 }}
-            fromZero
-            showValuesOnTopOfBars
-            verticalLabelRotation={45}
-          />
-        </ScrollView>
+            {/* Bar Chart with Project IDs */}
+            <Text style={styles.sectionTitle}>
+              Project Progress (Completed Tasks)
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <BarChart
+                data={progressData}
+                width={Math.max(screenWidth - 32, projects.length * 80)}
+                height={240}
+                chartConfig={chartConfig}
+                style={{ borderRadius: 12 }}
+                fromZero
+                showValuesOnTopOfBars
+                verticalLabelRotation={45}
+              />
+            </ScrollView>
 
-        {/* Legend mapping project IDs -> full names */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.legendContainer}>
-            {projects.map((p) => (
-              <View style={styles.legendItem} key={p.id}>
-                <View
-                  style={[styles.legendColorBox, { backgroundColor: p.color }]}
-                />
-                <Text style={styles.legendText}>
-                  {p.id} — {p.name}
-                </Text>
+            {/* Legend mapping project IDs -> full names */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.legendContainer}>
+                {projects.map((p) => (
+                  <View style={styles.legendItem} key={p.id}>
+                    <View
+                      style={[
+                        styles.legendColorBox,
+                        { backgroundColor: p.color },
+                      ]}
+                    />
+                    <Text style={styles.legendText}>
+                      {p.id} — {p.name}
+                    </Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        </ScrollView>
+            </ScrollView>
 
-        {/* Recent Activity */}
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-        <View style={styles.listItem}>
-          <Text style={styles.listText}>✔ Task completed by John</Text>
-        </View>
-        <View style={styles.listItem}>
-          <Text style={styles.listText}>⚠ Project Beta deadline in 3 days</Text>
-        </View>
-        <View style={styles.listItem}>
-          <Text style={styles.listText}>+ New user added: Maria</Text>
-        </View>
+            {/* Recent Activity */}
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            <View style={styles.listItem}>
+              <Text style={styles.listText}>✔ Task completed by John</Text>
+            </View>
+            <View style={styles.listItem}>
+              <Text style={styles.listText}>
+                ⚠ Project Beta deadline in 3 days
+              </Text>
+            </View>
+            <View style={styles.listItem}>
+              <Text style={styles.listText}>+ New user added: Maria</Text>
+            </View>
+          </>
+        )}
       </ScrollView>
     </View>
   );
