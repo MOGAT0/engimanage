@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require('fs');
 
 const app = express();
-const port = 3000;
+const port = 6001;
 
 app.use(cors());
 app.use(express.json());
@@ -2780,6 +2780,33 @@ app.post('/api/getProjectGraphStatus',(req,res)=>{
     res.status(500).json({ok:false,message:error})
   }
 })
+
+app.post("/api/testconnection", (req, res) => {
+  const { newIP } = req.body;
+
+  try {
+    // Build the new file content using your requested format
+    const content = `let ipaddress = "${newIP}"
+let port = "6001"
+const serverLink= \`http://\${ipaddress}:\${port}\`;
+const api_link =  \`\${serverLink}/api\`;
+
+export default {serverLink,api_link,ipaddress,port}
+`;
+
+    // Write into globalscript.js (adjust the path if needed)
+    fs.writeFileSync(
+      path.join(__dirname, ".././app/globals/globalscript.js"),
+      content,
+      "utf8"
+    );
+
+    res.status(200).json({ ok: true, message: "IP updated successfully" });
+  } catch (error) {
+    console.error("Error writing file:", error);
+    res.status(500).json({ ok: false, message: "Error updating globalscript.js" });
+  }
+});
 
 
 // para sa port connection--------------------------------------------->

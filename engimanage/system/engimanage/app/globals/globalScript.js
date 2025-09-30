@@ -1,4 +1,6 @@
-serverLink= "http://192.168.1.6:3000"; //localhost
-api_link =  `${serverLink}/api`;
+let ipaddress = "192.168.124.11"
+let port = "6001"
+const serverLink= `http://${ipaddress}:${port}`;
+const api_link =  `${serverLink}/api`;
 
-export default {serverLink,api_link}
+export default {serverLink,api_link,ipaddress,port}

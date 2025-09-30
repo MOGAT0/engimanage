@@ -257,6 +257,7 @@ const RootLayout = () => {
       <Stack.Screen name="project_components/taskComments" options={{ headerShown: false, title: "" }} />
 
       <Stack.Screen name="admin/adminHandler" options={{ headerShown: false, title: "" }} />
+      <Stack.Screen name="signin/setting" options={{ headerShown: false, title: "" }} />
 
 
       

@@ -205,7 +205,7 @@ const adminDashboard = () => {
             </ScrollView>
 
             {/* Recent Activity */}
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            {/* <Text style={styles.sectionTitle}>Recent Activity</Text>
             <View style={styles.listItem}>
               <Text style={styles.listText}>✔ Task completed by John</Text>
             </View>
@@ -216,7 +216,7 @@ const adminDashboard = () => {
             </View>
             <View style={styles.listItem}>
               <Text style={styles.listText}>+ New user added: Maria</Text>
-            </View>
+            </View> */}
           </>
         )}
       </ScrollView>

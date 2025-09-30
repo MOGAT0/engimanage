@@ -1,14 +1,18 @@
-// removed ! -------------------------------------------------------------------------------------->
-
-
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { router } from "expo-router";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const LoginAs = ({ navigation }) => {
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.setting} onPress={()=> router.navigate('./setting')}>
+        <Ionicons name='settings' size={25} color={"gray"}/>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Login As</Text>
+
+
 
       <TouchableOpacity
         style={[styles.card, { backgroundColor: '#fff', borderColor:"#28a745",borderWidth:1}]}
@@ -29,9 +33,9 @@ const LoginAs = ({ navigation }) => {
         onPress={() => router.navigate('./supplierLogin')}
       >
         <Text style={styles.cardText}>Supplier</Text>
-      </TouchableOpacity> */}
+      </TouchableOpacity>
 
-      {/* <TouchableOpacity
+      <TouchableOpacity
         style={[styles.card, { backgroundColor: '#fff', borderColor:"#331177",borderWidth:1 }]}
         // onPress={() => router.navigate('./supplierLogin')}
       >
@@ -73,5 +77,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#331177',
     fontWeight: '600',
+  },
+  setting:{
+    position:"absolute",
+    top:50,
+    right:20,
   },
 });
