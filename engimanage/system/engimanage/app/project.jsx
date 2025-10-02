@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import ProjectPanel from "./project_components/projectPanel";
@@ -50,6 +51,10 @@ const Project = () => {
   const [selectedProjectID, setSelectedProjectID] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isClickedLoading, setIsClickedLoading] = useState(false);
+  const [isLoadingCreate, setIsLoadingCreate] = useState(false);
+
   // useEffect(()=>{
   //   Toast.success("Welcome")
   // },[])
@@ -82,13 +87,6 @@ const Project = () => {
     userProjects();
     getothersproject();
     fetchProjects();
-
-    // display projects ------------------->
-    if (projects.length > 0) {
-      styles.bootup = { display: "none" };
-    } else {
-      styles.bootup = { display: "flex" };
-    }
   }, [userRole, userID, pass, email, projectManager, userPermission]);
 
   // update login data ---------------------------------------------------------------->
@@ -135,6 +133,7 @@ const Project = () => {
   // display all existing groups ---------------------------------->
   const fetchProjects = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch(`${link.api_link}/getprojects`, {
         method: "POST",
         headers: {
@@ -154,6 +153,8 @@ const Project = () => {
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -205,6 +206,7 @@ const Project = () => {
 
   // request create ---------------------------------->
   const handleCreateProject = async () => {
+    setIsClickedLoading(true);
     if (
       userPermission !== "add_edit_update_delete" &&
       userPermission !== "full"
@@ -248,6 +250,7 @@ const Project = () => {
       console.error(err);
     } finally {
       setPopup(false);
+      setIsClickedLoading(false);
     }
   };
 
@@ -283,8 +286,7 @@ const Project = () => {
 
   // project membership verification before opening sang project ----------------->
   const handleProjectClick = async (projectID) => {
-    // console.log(projectID);
-
+    setIsClickedLoading(true);
     try {
       const reqBody = {
         userID,
@@ -300,22 +302,24 @@ const Project = () => {
 
       const data = await response.json();
 
-      if(userPermission !== "view"){
+      if (userPermission !== "view") {
         if (data.length >= 1 || userPermission === "full") {
+          setIsClickedLoading(false);
           router.navigate(
             `/project_components/projectHandler?projectID=${projectID}&homeRoute=tabsHandler&userType=employee`
           );
         } else {
           setSelectedProjectID(projectID);
           setJoinpopup(true);
+          setIsClickedLoading(false);
         }
-      }else{
-        Toast.info("Unauthorized")
+      } else {
+        Toast.info("Unauthorized");
+        setIsClickedLoading(false);
       }
-
-
     } catch (error) {
       console.error(error);
+      setIsClickedLoading(false);
     }
   };
 
@@ -358,7 +362,6 @@ const Project = () => {
       <Containers position={"top"} duration={1000} style={{ width: "300" }} />
 
       <Text style={styles.title}>Projects</Text>
-
       <View style={styles.filterContainer}>
         {FILTERS.map((filter) => (
           <TouchableOpacity
@@ -380,52 +383,53 @@ const Project = () => {
           </TouchableOpacity>
         ))}
       </View>
-      <Text
-        style={
-          projects.length > 0
-            ? { display: "none" }
-            : { color: "red", marginTop: 200 }
-        }
-      >
-        {"~No active projects"}
-      </Text>
 
-      {/* project panel */}
-      <ScrollView
-        style={{ width: "100%" }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={async () => {
-              setRefreshing(true);
-              await fetchProjects();
-              await userProjects();
-              await getothersproject();
-              setRefreshing(false);
-            }}
-            colors={["#332277"]}
-          />
-        }
-      >
-        {getFilteredProjects().map((project) => (
-          <ProjectPanel
-            
-            key={project.ID}
-            pmanager={project.projectManager.replace(/_/g, " ")}
-            pname={project.projectName}
-            css={styles.project_panel}
-            onClick={() => handleProjectClick(project.ID)}
-            txtstyle={{
-              fontSize: 20,
-              fontWeight: "bold",
-              color: "black",
-              marginBottom: 10,
-            }}
-            joined={currentProjects.some((cp) => cp.ID === project.ID)}
-            // projectStatus={project.status}
-          />
-        ))}
-      </ScrollView>
+      {isLoading ? (
+        <ActivityIndicator />
+      ) : (
+        <>
+          {/* project panel */}
+          <ScrollView
+            style={{ width: "100%" }}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={async () => {
+                  setRefreshing(true);
+                  await fetchProjects();
+                  await userProjects();
+                  await getothersproject();
+                  setRefreshing(false);
+                }}
+                colors={["#332277"]}
+              />
+            }
+          >
+            {getFilteredProjects().map((project) => (
+              <ProjectPanel
+                key={project.ID}
+                pmanager={project.projectManager.replace(/_/g, " ")}
+                pname={project.projectName}
+                css={styles.project_panel}
+                onClick={() => handleProjectClick(project.ID)}
+                txtstyle={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  color: "black",
+                  marginBottom: 10,
+                }}
+                joined={currentProjects.some((cp) => cp.ID === project.ID)}
+                // projectStatus={project.status}
+              />
+            ))}
+          </ScrollView>
+          {projects.length === 0 && (
+            <Text style={{ color: "red", marginTop: 200 }}>
+              {"~No active projects"}
+            </Text>
+          )}
+        </>
+      )}
 
       {userPermission !== "view" && (
         <TouchableOpacity
@@ -554,6 +558,21 @@ const Project = () => {
           />
         )}
       </Dialog.Container>
+
+      {isClickedLoading && (
+        <Modal transparent={true}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.3)",
+            }}
+          >
+            <ActivityIndicator size="large" color="#332277" />
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };

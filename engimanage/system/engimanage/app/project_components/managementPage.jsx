@@ -31,12 +31,12 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [isManager, setIsManager] = useState(false);
 
-  const [projectName, setProjectName] = useState("~Project Name");
+  const [projectName, setProjectName] = useState("loading...");
 
   const [members, setMembers] = useState(null);
   const [availableMembers, setAvailableMembers] = useState([]);
 
-  const [teamLeader, setTeamLeader] = useState("~team leader");
+  const [teamLeader, setTeamLeader] = useState("loading...");
   const [tlID, setTLID] = useState("");
 
   const [showRoleModal, setShowRoleModal] = useState(false);

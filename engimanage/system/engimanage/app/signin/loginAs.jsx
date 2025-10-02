@@ -6,9 +6,9 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 const LoginAs = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.setting} onPress={()=> router.navigate('./setting')}>
+      {/* <TouchableOpacity style={styles.setting} onPress={()=> router.navigate('./setting')}>
         <Ionicons name='settings' size={25} color={"gray"}/>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <Text style={styles.title}>Login As</Text>
 

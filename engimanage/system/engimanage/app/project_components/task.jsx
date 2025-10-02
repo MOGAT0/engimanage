@@ -272,6 +272,8 @@ const Task = ({ projectID, homeRoute, userType }) => {
         handleGetTasks();
       } else {
         Toast.error(data.message || "Failed to take task");
+        console.log(data.message);
+        
       }
     } catch (error) {
       console.log(error);
