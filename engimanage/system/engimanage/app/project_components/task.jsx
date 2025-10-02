@@ -11,6 +11,7 @@ import {
   Alert,
   Pressable,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import { ProgressBar } from "react-native-paper";
 import DataSecureStorage from "../components/DataSecureStorage";
@@ -62,24 +63,36 @@ const Task = ({ projectID, homeRoute, userType }) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuTaskId, setMenuTaskId] = useState(null);
   const [anchorRect, setAnchorRect] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const menuButtonRefs = useRef({});
 
+  // useEffect(() => {
+  //   getUserInfo();
+  //   handleGetTasks();
+  //   const timer = setTimeout(() => {
+  //     setLoadingTimeout(true);
+  //   }, 500);
+
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     handleGetTasks();
+  //   }, 500);
+
+  //   return () => clearInterval(interval);
+  // }, []);
+
+  // Initial load
   useEffect(() => {
-    getUserInfo();
-    handleGetTasks();
-    const timer = setTimeout(() => {
-      setLoadingTimeout(true);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      handleGetTasks();
-    }, 500);
-
-    return () => clearInterval(interval);
+    const init = async () => {
+      await getUserInfo();
+      await handleGetTasks();
+      setLoading(false);
+    };
+    init();
   }, []);
 
   const fetchProjectMembers = async () => {
@@ -110,7 +123,9 @@ const Task = ({ projectID, homeRoute, userType }) => {
   };
 
   const getUserInfo = async () => {
-    const data = await DataSecureStorage.getItem(userType === "admin" ? "adminLoginData" : "loginData");
+    const data = await DataSecureStorage.getItem(
+      userType === "admin" ? "adminLoginData" : "loginData"
+    );
     if (data) {
       const info = JSON.parse(data);
       setUserinfo(info);
@@ -162,8 +177,11 @@ const Task = ({ projectID, homeRoute, userType }) => {
     }
   };
 
-  const handleGetTasks = async () => {
+  const handleGetTasks = async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     try {
+      console.log("tasks");
+
       const reqBody = { projectID };
       const response = await fetch(`${link.api_link}/getTasks`, {
         method: "POST",
@@ -182,11 +200,19 @@ const Task = ({ projectID, homeRoute, userType }) => {
         }, {});
         setTaskProgress(initial);
       } else {
-        setTask(null);
+        setTask([]);
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    handleGetTasks(true);
   };
 
   const updateTasks = async (id, progress) => {
@@ -273,7 +299,6 @@ const Task = ({ projectID, homeRoute, userType }) => {
       } else {
         Toast.error(data.message || "Failed to take task");
         console.log(data.message);
-        
       }
     } catch (error) {
       console.log(error);
@@ -308,6 +333,8 @@ const Task = ({ projectID, homeRoute, userType }) => {
         setNewTaskDescription("");
       } else {
         Toast.error(data.message || "Failed to create task");
+        console.log(data.message);
+        
       }
     } catch (error) {
       console.error(error);
@@ -337,18 +364,21 @@ const Task = ({ projectID, homeRoute, userType }) => {
     Object.values(taskProgress).reduce((sum, val) => sum + val, 0) /
     (TASKS?.length * 100 || 1);
 
-  // Calculate final menu position within screen bounds
   const getMenuStyle = () => {
     if (!anchorRect) return {};
-    const top = Math.min(
-      anchorRect.y + anchorRect.height + 6,
-      SCREEN.height - 8 - 120
-    );
+
+    const top = Math.min(anchorRect.y, SCREEN.height - 8 - 120);
+
     const left = Math.min(
       Math.max(8, anchorRect.x + anchorRect.width - MENU_WIDTH),
       SCREEN.width - MENU_WIDTH - 8
     );
-    return { top, left, width: MENU_WIDTH };
+
+    return {
+      top: top + 4,
+      left,
+      width: MENU_WIDTH,
+    };
   };
 
   return (
@@ -360,43 +390,27 @@ const Task = ({ projectID, homeRoute, userType }) => {
         style={{ width: "250" }}
         showCloseIcon={true}
       />
-      {TASKS === null ? (
+      {/* Loading state */}
+      {loading ? (
         <View style={styles.container}>
-          {/* <Text style={styles.title}>Tasks</Text> */}
-          {loadingTimeout ? (
-            <>
-              {(userInfo?.permission_key === "full" ||
-                userInfo?.permission_key === "add_edit_update_delete") && (
-                <TouchableOpacity
-                  style={styles.addButton}
-                  onPress={() => setShowModal(true)}
-                >
-                  <Text style={styles.addButtonText}>+ Add Task</Text>
-                </TouchableOpacity>
-              )}
-              <Text style={{ color: "red" }}>No Current Task</Text>
-            </>
-          ) : (
-            <>
-              <Text style={styles.loadingText}>Loading tasks...</Text>
-              <ActivityIndicator size="large" color="#4CAF50" />
-            </>
+          <Text style={styles.loadingText}>Loading tasks...</Text>
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      ) : TASKS.length === 0 ? (
+        <View style={styles.container}>
+          {(userInfo?.permission_key === "full" ||
+            userInfo?.permission_key === "add_edit_update_delete") && (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => setShowModal(true)}
+            >
+              <Text style={styles.addButtonText}>+ Add Task</Text>
+            </TouchableOpacity>
           )}
+          <Text style={{ color: "red" }}>No Current Task</Text>
         </View>
       ) : (
         <>
-          {/* <Text style={styles.title}>Tasks</Text> */}
-          {/* <View style={styles.progressContainer}>
-            <Text style={styles.progressText}>
-              {Math.round(totalProgress * 100)}% Complete
-            </Text>
-            <ProgressBar
-              progress={totalProgress}
-              color="#4CAF50"
-              style={styles.progressBar}
-            />
-          </View> */}
-
           {(userInfo?.permission_key === "full" ||
             userInfo?.permission_key === "add_edit_update_delete") && (
             <TouchableOpacity
@@ -411,6 +425,9 @@ const Task = ({ projectID, homeRoute, userType }) => {
             style={styles.scrollArea}
             showsVerticalScrollIndicator={false}
             onScrollBeginDrag={() => menuVisible && closeMenu()}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           >
             {TASKS.map((task) => {
               const isChecked = taskProgress[task.ID] === 100;
@@ -547,14 +564,6 @@ const Task = ({ projectID, homeRoute, userType }) => {
                                 taskName: currentTask.label,
                                 taskDeadline: currentTask.task_deadline,
                               });
-                              console.log("Assign pressed", {
-                                userId: userInfo.ID,
-                                projectId: currentTask.projectID,
-                                taskId: currentTask.ID,
-                                taskName: currentTask.label,
-                                taskDeadline: currentTask.task_deadline,
-                              });
-
                               closeMenu();
                             }}
                           >
@@ -719,7 +728,7 @@ const Task = ({ projectID, homeRoute, userType }) => {
                 <Text>Deadline: </Text>
                 <Text style={{ color: deadline ? "#000" : "#aaa" }}>
                   {deadline
-                    ? deadline.toISOString().split("T")[0]
+                    ? deadline.toLocaleDateString("en-CA") // gives YYYY-MM-DD in local timezone
                     : "Select deadline"}
                 </Text>
               </Pressable>
@@ -728,14 +737,14 @@ const Task = ({ projectID, homeRoute, userType }) => {
                 <DateTimePicker
                   value={deadline || new Date()}
                   mode="date"
-                  display="calendar"
+                  display="default"
                   onChange={(event, selectedDate) => {
                     setShowDeadlinePicker(false);
                     if (selectedDate) {
                       const onlyDate = new Date(
                         selectedDate.getFullYear(),
                         selectedDate.getMonth(),
-                        selectedDate.getDate() + 1
+                        selectedDate.getDate()
                       );
                       setDeadline(onlyDate);
                     }

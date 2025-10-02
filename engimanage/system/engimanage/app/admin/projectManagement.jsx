@@ -81,6 +81,7 @@ const ProjectCard = ({ project }) => {
     >
       <Text style={styles.projectName}>{project.projectName}</Text>
       <Text style={styles.projectDesc}>{project.desc}</Text>
+      <Text style={{color:"#c2c2c2", fontSize:12, marginVertical:10}}>{project.projectManager.replace(/_/g," ")}</Text>
       <View style={styles.memberRow}>
         <Ionicons name="person-outline" size={16} color="#555" />
         <Text style={styles.memberCount}>{memberCount} members</Text>
@@ -149,7 +150,7 @@ const projectManagement = () => {
 
       if (data.ok) {
         setProjects(data.projects);
-        // console.log("Projects:", data.projects);
+        console.log("Projects:", data.projects);
       } else {
         console.log("No data response");
       }
@@ -193,6 +194,8 @@ const projectManagement = () => {
         keyExtractor={(item) => item.ID.toString()}
         contentContainerStyle={{ padding: 5 }}
         renderItem={({ item }) => <ProjectCard project={item} />}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
       />
     </View>
   );

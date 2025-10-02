@@ -73,7 +73,7 @@ const Overall_dashboard = () => {
           style={styles.projectHeader}
           onPress={() => setExpanded(!expanded)}
         >
-          <Text style={styles.projectName}>{project.name}</Text>
+          <Text style={styles.projectName}>{project.projectName}</Text>
           <Ionicons
             name={expanded ? "caret-up" : "caret-down"}
             size={20}
@@ -367,7 +367,7 @@ const Overall_dashboard = () => {
           <Text style={styles.sectionTitle}>Most Productive Projects</Text>
           <FlatList
             data={projects}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.projectID}
             renderItem={({ item }) => <ProjectCard project={item} />}
             contentContainerStyle={{ paddingBottom: 40 }}
             refreshing={refreshingProjects}

@@ -219,7 +219,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     if (selectedDate) {
       const formattedDate = selectedDate.toISOString().split("T")[0];
       setDeadline(new Date(formattedDate));
-      // updateDeadline(formattedDate);
+      updateDeadline(formattedDate);
     }
     setShowDatePicker(false);
   };
@@ -444,7 +444,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     }
   };
 
-  // const formattedDeadline = deadline.toISOString().split("T")[0];
+  const formattedDeadline = deadline.toISOString().split("T")[0];
 
   return (
     <View style={styles.container}>
@@ -493,7 +493,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
       </View> */}
 
         {/* Deadline Section */}
-        {/* <View style={styles.card}>
+        <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.sectionTitle}>
             <Ionicons name="calendar" size={24} color="#2c3e50" /> Deadline
@@ -515,7 +515,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
             onChange={handleDateChange}
           />
         )}
-      </View> */}
+      </View>
 
         <View
           style={[
