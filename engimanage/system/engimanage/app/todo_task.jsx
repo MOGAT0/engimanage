@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,44 +6,51 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import DataSecureStorage from "./components/DataSecureStorage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import globalScript from "../app/globals/globalScript";
 import { router } from "expo-router";
+
 const link = globalScript;
 
 const Todo_task = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [employeeID, setEmployeeID] = useState(null);
   const [filter, setFilter] = useState("Assigned"); // "Assigned" | "Completed"
 
-  const getUserInfo = async () => {
-    const data = await DataSecureStorage.getItem("loginData");
-    if (data) {
-      const info = JSON.parse(data);
-      setEmployeeID(info.ID);
-    }
-  };
-
+  // ✅ Fetch employee info once
   useEffect(() => {
+    const getUserInfo = async () => {
+      const data = await DataSecureStorage.getItem("loginData");
+      if (data) {
+        const info = JSON.parse(data);
+        setEmployeeID(info.ID);
+      }
+    };
     getUserInfo();
-  }, [employeeID]);
+  }, []);
 
-  const handle_getTodotask = async () => {
+  // ✅ Task fetching function
+  const handle_getTodotask = useCallback(async () => {
+    if (!employeeID) return;
+
+    console.log("todo task");
+    
+
     try {
+      if (!refreshing) setLoading(true);
+
       const response = await fetch(`${link.api_link}/getTodoTask`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeID }),
       });
 
       const data = await response.json();
-
       if (data.ok) {
         setTasks(data.data);
       }
@@ -51,34 +58,33 @@ const Todo_task = () => {
       console.log(error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [employeeID, refreshing]);
 
+  // ✅ Fetch tasks once employeeID is available
   useEffect(() => {
-    let interval;
-
     if (employeeID) {
       handle_getTodotask();
-      interval = setInterval(() => {
-        handle_getTodotask();
-      }, 1000);
     }
+  }, [employeeID, handle_getTodotask]);
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [employeeID]);
+  // ✅ Pull-to-refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    handle_getTodotask();
+  };
 
   // Apply filter based on progress
   const filteredTasks = tasks.filter((task) =>
     filter === "Assigned" ? task.progress === 0 : task.progress === 100
   );
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#000" />
-        {loadingTimeout && <Text>Loading tasks...</Text>}
+        <Text>Loading tasks...</Text>
       </View>
     );
   }
@@ -115,20 +121,12 @@ const Todo_task = () => {
       {/* Messages when no tasks */}
       {filter === "Assigned" && filteredTasks.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons
-            name="checkmark-done-circle-outline"
-            size={80}
-            color="orange"
-          />
+          <Ionicons name="checkmark-done-circle-outline" size={80} color="orange" />
           <Text style={styles.caughtUpText}>You're all caught up for now.</Text>
         </View>
       ) : filter === "Completed" && filteredTasks.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons
-            name="clipboard-outline"
-            size={80}
-            color="gray"
-          />
+          <Ionicons name="clipboard-outline" size={80} color="gray" />
           <Text style={styles.nothingHereText}>Nothing to see here</Text>
         </View>
       ) : (
@@ -173,6 +171,9 @@ const Todo_task = () => {
               <Ionicons name="chevron-forward-outline" size={25} color="#332277" />
             </TouchableOpacity>
           )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       )}
     </View>
