@@ -334,7 +334,6 @@ const Task = ({ projectID, homeRoute, userType }) => {
       } else {
         Toast.error(data.message || "Failed to create task");
         console.log(data.message);
-        
       }
     } catch (error) {
       console.error(error);
@@ -548,82 +547,101 @@ const Task = ({ projectID, homeRoute, userType }) => {
                       style={StyleSheet.absoluteFill}
                     >
                       <View style={[styles.menuCard, getMenuStyle()]}>
-                        {(userInfo?.permission_key ===
-                          "add_edit_update_delete" ||
-                          userInfo?.permission_key === "full") && (
-                          <Pressable
-                            style={styles.menuItem}
-                            onPress={() => {
-                              const currentTask = TASKS.find(
-                                (t) => t.ID === menuTaskId
-                              );
-                              openAssignModal({
-                                userId: userInfo.ID,
-                                projectId: currentTask.projectID,
-                                taskId: currentTask.ID,
-                                taskName: currentTask.label,
-                                taskDeadline: currentTask.task_deadline,
-                              });
-                              closeMenu();
-                            }}
-                          >
-                            <Ionicons name="person-add-outline" size={18} />
-                            <Text style={styles.menuText}>Assign To</Text>
-                          </Pressable>
-                        )}
+                        {(() => {
+                          const currentTask = TASKS.find(
+                            (t) => t.ID === menuTaskId
+                          );
+                          if (!currentTask) return null;
+                          const isComplete = currentTask.progress === 100;
 
-                        <Pressable
-                          style={styles.menuItem}
-                          onPress={() => {
-                            const currentTask = TASKS.find(
-                              (t) => t.ID === menuTaskId
-                            );
-                            if (!currentTask) return;
+                          return (
+                            <>
+                              {/* Show Assign To only if task is not complete */}
+                              {!isComplete &&
+                                (userInfo?.permission_key ===
+                                  "add_edit_update_delete" || userInfo?.permission_key ===
+                                  "full") && (
+                                  <Pressable
+                                    style={styles.menuItem}
+                                    onPress={() => {
+                                      openAssignModal({
+                                        userId: userInfo.ID,
+                                        projectId: currentTask.projectID,
+                                        taskId: currentTask.ID,
+                                        taskName: currentTask.label,
+                                        taskDeadline: currentTask.task_deadline,
+                                      });
+                                      closeMenu();
+                                    }}
+                                  >
+                                    <Ionicons
+                                      name="person-add-outline"
+                                      size={18}
+                                    />
+                                    <Text style={styles.menuText}>
+                                      Assign To
+                                    </Text>
+                                  </Pressable>
+                                )}
 
-                            handle_takeTask(
-                              userInfo.ID,
-                              currentTask.projectID,
-                              currentTask.ID,
-                              currentTask.label,
-                              currentTask.task_deadline
-                            );
+                              {/* Show Take only if task is not complete */}
+                              {!isComplete &&
+                                userInfo?.permission_key ===
+                                  "add_edit_update_delete" && (
+                                  <Pressable
+                                    style={styles.menuItem}
+                                    onPress={() => {
+                                      handle_takeTask(
+                                        userInfo.ID,
+                                        currentTask.projectID,
+                                        currentTask.ID,
+                                        currentTask.label,
+                                        currentTask.task_deadline
+                                      );
+                                      closeMenu();
+                                    }}
+                                  >
+                                    <Ionicons
+                                      name="download-outline"
+                                      size={18}
+                                    />
+                                    <Text style={styles.menuText}>Take</Text>
+                                  </Pressable>
+                                )}
 
-                            console.log("Take pressed", {
-                              userId: userInfo.ID,
-                              projectId: currentTask.projectID,
-                              taskId: currentTask.ID,
-                              taskName: currentTask.label,
-                              taskDeadline: currentTask.task_deadline,
-                            });
+                              {!isComplete &&
+                                userInfo?.permission_key ===
+                                  "add_edit_update_delete" && (
+                                  <View style={styles.menuDivider} />
+                                )
+                              }
 
-                            closeMenu();
-                          }}
-                        >
-                          <Ionicons name="download-outline" size={18} />
-                          <Text style={styles.menuText}>Take</Text>
-                        </Pressable>
-
-                        <View style={styles.menuDivider} />
-
-                        {(userInfo?.permission_key ===
-                          "add_edit_update_delete" ||
-                          userInfo?.permission_key === "full") && (
-                          <Pressable
-                            style={styles.menuItem}
-                            onPress={() => {
-                              const id = menuTaskId;
-                              closeMenu();
-                              if (id != null) handleDeteleTask(id);
-                            }}
-                          >
-                            <Ionicons name="trash-outline" size={18} />
-                            <Text
-                              style={[styles.menuText, { color: "#e53935" }]}
-                            >
-                              Delete
-                            </Text>
-                          </Pressable>
-                        )}
+                              {/* Delete remains */}
+                              {(userInfo?.permission_key ===
+                                "add_edit_update_delete" ||
+                                userInfo?.permission_key === "full") && (
+                                <Pressable
+                                  style={styles.menuItem}
+                                  onPress={() => {
+                                    const id = menuTaskId;
+                                    closeMenu();
+                                    if (id != null) handleDeteleTask(id);
+                                  }}
+                                >
+                                  <Ionicons name="trash-outline" size={18} />
+                                  <Text
+                                    style={[
+                                      styles.menuText,
+                                      { color: "#e53935" },
+                                    ]}
+                                  >
+                                    Delete
+                                  </Text>
+                                </Pressable>
+                              )}
+                            </>
+                          );
+                        })()}
                       </View>
                     </View>
                   </Modal>

@@ -117,7 +117,8 @@ const TaskView = () => {
       const data = await response.json();
 
       if(data.ok){
-        // alert(data.message);
+        console.log(data.message);
+        
         
       }else{
         console.log(data.message);
@@ -256,7 +257,7 @@ const TaskView = () => {
       )}
 
       {/* Bottom Work Area */}
-      {taskData && taskData.some((task) => task.employeeID == userInfo.ID ) && (
+      {taskData && taskData.some((task) => task.employeeID == userInfo.ID )&& taskData.some((task) => task.progress <= 0 ) && (
         <View style={styles.bottomBar}>
           {/* Caret-up icon to open modal */}
           <TouchableOpacity

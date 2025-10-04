@@ -32,33 +32,6 @@ const CustomProgressBar = ({ progress }) => (
 
 const DashboardPage = ({projectID,homeRoute,userType}) => {
   
-  // const { projectID, homeRoute } = useLocalSearchParams();
-
-  // temporary data ===================================================================
-  // const [projects] = useState([
-  //   { id: "1", name: "Warehouse Expansion", progress: 70, status: "Ongoing" },
-  //   { id: "2", name: "Logistics Upgrade", progress: 90, status: "Completed" },
-  //   { id: "3", name: "Security Enhancement", progress: 30, status: "Pending" },
-  // ]);
-  // const [chartData] = useState({
-  //   labels: [
-  //     "Jan",
-  //     "Feb",
-  //     "Mar",
-  //     "Apr",
-  //     "May",
-  //     "Jun",
-  //     "Jul",
-  //     "Aug",
-  //     "Sep",
-  //     "Oct",
-  //     "Nov",
-  //     "Dec",
-  //   ],
-  //   datasets: [{ data: [3, 6, 9, 17, 23, 10, 11, 13, 23, 5, 3, 12] }],
-  // });
-  // ===================================================================================
-
   const [groupedData, setGroupedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [projectprogress, setProjectprogress] = useState(0);

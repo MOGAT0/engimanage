@@ -17,12 +17,13 @@ import { router } from "expo-router";
 import Br from "./components/spacer";
 import * as SecureStore from "expo-secure-store";
 import Containers, { Toast } from "toastify-react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import globalScript from "./globals/globalScript";
 
 const link = globalScript;
 const API_LINK_create = `${link.api_link}/createproject`;
-const API_LINK_join = `${link.api_link}/joinproject`;
+const API_LINK_join = `${link.api_link}/send_request`;
 
 const Project = () => {
   const [popUp, setPopup] = useState(false);
@@ -31,7 +32,10 @@ const Project = () => {
 
   const [projectName, setProjectName] = useState("");
   const [desc, setDesc] = useState("");
+  const [projectDeadline, setProjectDeadline] = useState(new Date());
   const [projectManager, setProjectManager] = useState("");
+
+  const [showDeadlinePicker, setShowDeadlinePicker] = useState(false);
 
   const [joinPin, setJoinpin] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -221,6 +225,7 @@ const Project = () => {
         desc,
         projectManager,
         userID,
+        deadline: projectDeadline,
       };
 
       const response = await fetch(API_LINK_create, {
@@ -485,7 +490,6 @@ const Project = () => {
       </Modal>
 
       {/* create popup */}
-
       <Dialog.Container visible={createpopUp}>
         <Text
           style={{
@@ -497,7 +501,7 @@ const Project = () => {
         >
           Create Project
         </Text>
-        {/* <Dialog.Description>Project Name</Dialog.Description> */}
+
         <Dialog.Input
           value={projectName}
           onChangeText={setProjectName}
@@ -505,13 +509,44 @@ const Project = () => {
           style={{ color: "black" }}
         />
 
-        {/* <Dialog.Description>Project Description</Dialog.Description> */}
         <Dialog.Input
           value={desc}
           onChangeText={setDesc}
           placeholder="Enter project description"
           style={{ color: "black" }}
         />
+
+        {/* Deadline Picker */}
+        <TouchableOpacity
+          onPress={() => setShowDeadlinePicker(true)}
+          style={{
+            padding: 10,
+            borderWidth: 1,
+            borderRadius: 5,
+            borderColor: "#ccc",
+            marginTop: 10,
+          }}
+        >
+          <Text>
+            {projectDeadline
+              ? `Deadline: ${projectDeadline.toLocaleDateString()}`
+              : "Select Project Deadline"}
+          </Text>
+        </TouchableOpacity>
+
+        {showDeadlinePicker && (
+          <DateTimePicker
+            value={projectDeadline || new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDeadlinePicker(false); // hide picker on select
+              if (selectedDate) {
+                setProjectDeadline(selectedDate);
+              }
+            }}
+          />
+        )}
 
         <Dialog.Button label="Cancel" onPress={() => setCreatepopup(false)} />
         <Dialog.Button
@@ -520,6 +555,7 @@ const Project = () => {
             handleCreateProject();
             setProjectName("");
             setDesc("");
+            setProjectDeadline(new Date()); // reset after submit
             setCreatepopup(false);
           }}
         />
