@@ -168,13 +168,25 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
       formData.append("saveFilePath", currentPath || "/");
 
       // POST request
-      const res = await fetch(`${link.api_link}/uploadfiles`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
-        body: formData,
-      });
+      // const res = await fetch(`${link.api_link}/uploadfiles`, {
+      //   method: "POST",
+      //   headers: {
+      //     Accept: "application/json",
+      //   },
+      //   body: formData,
+      // });
+      
+      const res = await fetch(
+        `${link.api_link}/uploadfiles?saveFilePath=${encodeURIComponent(currentPath || "/")}`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+          body: formData,
+        }
+      );
+
 
       const data = await res.json();
 
