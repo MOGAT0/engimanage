@@ -4,7 +4,7 @@ import React from 'react'
 const FilePage = () => {
   return (
     <View>
-      <Text>FilePage</Text>
+      <Text>Temp FilePage</Text>
     </View>
   )
 }

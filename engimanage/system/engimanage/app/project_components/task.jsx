@@ -53,7 +53,12 @@ const Task = ({ projectID, homeRoute, userType }) => {
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const [newTaskDescription, setNewTaskDescription] = useState("");
 
-  const [deadline, setDeadline] = useState(new Date());
+  const [deadline, setDeadline] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
+
   const [showDeadlinePicker, setShowDeadlinePicker] = useState(false);
 
   const [assignModalVisible, setAssignModalVisible] = useState(false);
@@ -482,34 +487,76 @@ const Task = ({ projectID, homeRoute, userType }) => {
                         )}
                       </View>
 
-                      <Text
-                        style={[
-                          styles.assignStatusText,
-                          (() => {
-                            let color = "gray"; // default
-                            switch (task.assign_status) {
-                              case "assigned":
-                                color = "blue";
-                                break;
-                              case "available":
-                                color = "green";
-                                break;
-                              case "pending":
-                                color = "orange";
-                                break;
-                              case "overdue":
-                                color = "red";
-                                break;
-                            }
-                            return {
-                              color: color,
-                              borderColor: color,
-                            };
-                          })(),
-                        ]}
-                      >
-                        {task.assign_status}
-                      </Text>
+                      {/* completion status text */}
+                      {(task.completion_status == "overdue") && (
+                        <View>
+                        <Text style={{color:"#5e5e5eff", fontSize:11}}>  status</Text>
+                        <Text
+                          style={[
+                            styles.assignStatusText,
+                            (() => {
+                              let color = "white";
+                              let backgroundColor = "gray";
+
+                              switch (task.completion_status) {
+                                case "ongoing":
+                                  backgroundColor = "orange";
+                                  break;
+                                case "completed":
+                                  backgroundColor = "#81E7AF";
+                                  break;
+                                case "overdue":
+                                  backgroundColor = "#fe4141ff";
+                                  break;
+                              }
+
+                              return {
+                                color: color,
+                                borderColor: color,
+                                backgroundColor: backgroundColor,
+                              };
+                            })(),
+                          ]}
+                        >
+                          {task.completion_status}
+                        </Text>
+                      </View>
+                      )}
+
+
+                      {/* assign status text */}
+                      <View>
+                        <Text style={{color:"#5e5e5eff", fontSize:11}}>  availablity</Text>
+                        <Text
+                          style={[
+                            styles.assignStatusText,
+                            (() => {
+                              let color = "gray"; // default
+                              switch (task.assign_status) {
+                                case "assigned":
+                                  color = "blue";
+                                  break;
+                                case "available":
+                                  color = "green";
+                                  break;
+                                case "pending":
+                                  color = "orange";
+                                  break;
+                                case "overdue":
+                                  color = "red";
+                                  break;
+                              }
+                              return {
+                                color: color,
+                                borderColor: color,
+                              };
+                            })(),
+                          ]}
+                        >
+                          {task.assign_status}
+                        </Text>
+                      </View>
+
                     </View>
                   </TouchableOpacity>
 
@@ -559,8 +606,8 @@ const Task = ({ projectID, homeRoute, userType }) => {
                               {/* Show Assign To only if task is not complete */}
                               {!isComplete &&
                                 (userInfo?.permission_key ===
-                                  "add_edit_update_delete" || userInfo?.permission_key ===
-                                  "full") && (
+                                  "add_edit_update_delete" ||
+                                  userInfo?.permission_key === "full") && (
                                   <Pressable
                                     style={styles.menuItem}
                                     onPress={() => {
@@ -613,8 +660,7 @@ const Task = ({ projectID, homeRoute, userType }) => {
                                 userInfo?.permission_key ===
                                   "add_edit_update_delete" && (
                                   <View style={styles.menuDivider} />
-                                )
-                              }
+                                )}
 
                               {/* Delete remains */}
                               {(userInfo?.permission_key ===
@@ -753,22 +799,29 @@ const Task = ({ projectID, homeRoute, userType }) => {
 
               {showDeadlinePicker && (
                 <DateTimePicker
-                  value={deadline || new Date()}
+                  value={deadline}
                   mode="date"
                   display="default"
                   onChange={(event, selectedDate) => {
                     setShowDeadlinePicker(false);
-                    if (selectedDate) {
-                      const onlyDate = new Date(
-                        selectedDate.getFullYear(),
-                        selectedDate.getMonth(),
-                        selectedDate.getDate()
-                      );
-                      setDeadline(onlyDate);
+                    if (event.type === "dismissed") return;
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const chosen = new Date(selectedDate);
+                    chosen.setHours(0, 0, 0, 0);
+
+                    if (chosen <= today) {
+                      Alert.alert("Invalid Deadline", "You can't pick a deadline that has already passed.");
+                      return;
                     }
+
+                    setDeadline(selectedDate);
                   }}
+                  minimumDate={new Date(new Date().setDate(new Date().getDate() + 1))}
                 />
               )}
+
             </View>
 
             <TouchableOpacity

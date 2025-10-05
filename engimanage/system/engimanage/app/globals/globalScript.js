@@ -1,4 +1,4 @@
-let ipaddress = "192.168.254.107"
+let ipaddress = "192.168.181.11"
 let port = "6001"
 let api_url = "https://engimanage-api-backend-production.up.railway.app"
 const serverLink= `${api_url}`; //local(debug) `http://${ipaddress}:${port}`

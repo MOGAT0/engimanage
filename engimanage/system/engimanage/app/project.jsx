@@ -32,7 +32,11 @@ const Project = () => {
 
   const [projectName, setProjectName] = useState("");
   const [desc, setDesc] = useState("");
-  const [projectDeadline, setProjectDeadline] = useState(new Date());
+  const [projectDeadline, setProjectDeadline] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [projectManager, setProjectManager] = useState("");
 
   const [showDeadlinePicker, setShowDeadlinePicker] = useState(false);
@@ -540,11 +544,25 @@ const Project = () => {
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
-              setShowDeadlinePicker(false); // hide picker on select
-              if (selectedDate) {
-                setProjectDeadline(selectedDate);
+              setShowDeadlinePicker(false);
+              if (event.type === "dismissed") return;
+
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const chosen = new Date(selectedDate);
+              chosen.setHours(0, 0, 0, 0);
+
+              if (chosen <= today) {
+                Alert.alert(
+                  "Invalid Deadline",
+                  "You can't pick a deadline that has already passed."
+                );
+                return;
               }
+
+              setDeadline(selectedDate);
             }}
+            minimumDate={new Date(new Date().setDate(new Date().getDate() + 1))}
           />
         )}
 

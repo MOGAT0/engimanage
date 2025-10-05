@@ -24,7 +24,11 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
   const [budget, setBudget] = useState(0);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
 
-  const [deadline, setDeadline] = useState(new Date());
+  const [deadline, setDeadline] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [showMemberModal, setShowMemberModal] = useState(false);
@@ -513,6 +517,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
             mode="date"
             display="default"
             onChange={handleDateChange}
+            minimumDate={new Date(new Date().setDate(new Date().getDate() + 1))}
           />
         )}
       </View>

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Stack } from "expo-router";
 import { View, AppState } from "react-native";
 import DataSecureStorage from "./components/DataSecureStorage";
-
 import globalScript from "./globals/randomPin";
 
 const RootLayout = () => {
@@ -22,12 +21,13 @@ const RootLayout = () => {
       }
 
       const parsedData = JSON.parse(userData);
-      
-      console.log(JSON.stringify({
+
+      console.log(
+        JSON.stringify({
           userID: parsedData.ID,
           status: user_status,
-      }));
-      
+        })
+      );
 
       const response = await fetch(`${link.api_link}/updateUserStatus`, {
         method: "POST",
@@ -39,7 +39,6 @@ const RootLayout = () => {
           status: user_status,
         }),
       });
-
 
       const resdata = await response.json();
 
@@ -70,7 +69,7 @@ const RootLayout = () => {
       handleAppStateChange
     );
     return () => subscription.remove();
-  },[]);
+  }, []);
 
   return (
     <Stack>
@@ -249,18 +248,32 @@ const RootLayout = () => {
 
       <Stack.Screen name="supplierHandler" options={{ headerShown: false }} />
       <Stack.Screen name="signin/loginAs" options={{ headerShown: false }} />
-      <Stack.Screen name="signin/supplierLogin" options={{ headerShown: false }} />
       <Stack.Screen
-        name="project_components/filePage" options={{ headerShown: false, title: "" }} />
+        name="signin/supplierLogin"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="project_components/filePage"
+        options={{ headerShown: false, title: "" }}
+      />
 
-      <Stack.Screen name="project_components/taskView" options={{ headerShown: false, title: "" }} />
-      <Stack.Screen name="project_components/taskComments" options={{ headerShown: false, title: "" }} />
+      <Stack.Screen
+        name="project_components/taskView"
+        options={{ headerShown: false, title: "" }}
+      />
+      <Stack.Screen
+        name="project_components/taskComments"
+        options={{ headerShown: false, title: "" }}
+      />
 
-      <Stack.Screen name="admin/adminHandler" options={{ headerShown: false, title: "" }} />
-      <Stack.Screen name="signin/setting" options={{ headerShown: false, title: "" }} />
-
-
-      
+      <Stack.Screen
+        name="admin/adminHandler"
+        options={{ headerShown: false, title: "" }}
+      />
+      <Stack.Screen
+        name="signin/setting"
+        options={{ headerShown: false, title: "" }}
+      />
     </Stack>
   );
 };
