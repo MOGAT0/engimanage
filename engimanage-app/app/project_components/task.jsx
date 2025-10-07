@@ -334,7 +334,6 @@ const Task = ({ projectID, homeRoute, userType }) => {
       if (data.ok) {
         // Toast.success("Task created successfully");
         handleGetTasks();
-        setDeadline(null);
         setNewTaskDescription("");
       } else {
         Toast.error(data.message || "Failed to create task");
@@ -443,8 +442,6 @@ const Task = ({ projectID, homeRoute, userType }) => {
                       router.navigate({
                         pathname: "project_components/taskView",
                         params: {
-                          label: task.label,
-                          task_deadline: task.task_deadline,
                           task_id: task.ID,
                         },
                       })

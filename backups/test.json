@@ -1,96 +1,30 @@
 [
-  [
-    [
-      {
-        "projectID": 120,
-        "projectName": "Test",
-        "tasks": [
-          { "name": "Order materials ", "progress": 100 },
-          { "name": "Vvggg", "progress": 100 },
-          { "name": "asdhajsdgh", "progress": 100 },
-          { "name": "asdasd", "progress": 100 },
-          { "name": "asdasd", "progress": 100 },
-          { "name": "asdasd", "progress": 100 },
-          { "name": "asdasd", "progress": 100 },
-          { "name": "Vvvvv", "progress": 100 },
-          { "name": "Hhh", "progress": 100 },
-          { "name": " Bbn", "progress": 100 },
-          { "name": "Hbbb", "progress": 100 }
-        ],
-        "completed": 11,
-        "uncompleted": 0,
-        "totalTasks": 11,
-        "progress": 100
-      },
-      {
-        "projectID": 121,
-        "projectName": "New",
-        "tasks": [
-          { "name": "Xccf", "progress": 100 },
-          { "name": "Tg", "progress": 100 },
-          { "name": "Cccc", "progress": 100 },
-          { "name": "Vvvvvv", "progress": 100 },
-          { "name": "Fdd", "progress": 100 },
-          { "name": "Ccc", "progress": 100 },
-          { "name": "Cccc", "progress": 100 },
-          { "name": "   Xxxx", "progress": 100 },
-          { "name": "Cccc", "progress": 100 },
-          { "name": "Ccc", "progress": 100 },
-          { "name": "F", "progress": 100 },
-          { "name": "F", "progress": 100 },
-          { "name": "F", "progress": 100 },
-          { "name": "F", "progress": 100 },
-          { "name": "Hh", "progress": 100 },
-          { "name": "Tedt", "progress": 0 },
-          { "name": "Neewtastjjj", "progress": 0 },
-          { "name": "Gvycuxfxx", "progress": 0 }
-        ],
-        "completed": 15,
-        "uncompleted": 3,
-        "totalTasks": 18,
-        "progress": 83
-      }
-    ]
-  ],
-
-  [
-    {
-      "id": "120",
-      "name": "Test",
-      "progress": null,
-      "completed": "014111111",
-      "uncompleted": "000000000",
-      "tasks": [
-        { "name": " Bbn", "progress": "100.0000" },
-        { "name": "asdasd", "progress": "100.0000" },
-        { "name": "asdhajsdgh", "progress": "100.0000" },
-        { "name": "Hbbb", "progress": "100.0000" },
-        { "name": "Hhh", "progress": "100.0000" },
-        { "name": "Order materials ", "progress": "100.0000" },
-        { "name": "Vvggg", "progress": "100.0000" },
-        { "name": "Vvvvv", "progress": "100.0000" }
-      ]
-    },
-    {
-      "id": "121",
-      "name": "New",
-      "progress": null,
-      "completed": "0123410100111",
-      "uncompleted": "0000001011000",
-      "tasks": [
-        { "name": "   Xxxx", "progress": "100.0000" },
-        { "name": "Ccc", "progress": "100.0000" },
-        { "name": "Cccc", "progress": "100.0000" },
-        { "name": "F", "progress": "100.0000" },
-        { "name": "Fdd", "progress": "100.0000" },
-        { "name": "Gvycuxfxx", "progress": "0.0000" },
-        { "name": "Hh", "progress": "100.0000" },
-        { "name": "Neewtastjjj", "progress": "0.0000" },
-        { "name": "Tedt", "progress": "0.0000" },
-        { "name": "Tg", "progress": "100.0000" },
-        { "name": "Vvvvvv", "progress": "100.0000" },
-        { "name": "Xccf", "progress": "100.0000" }
-      ]
-    }
-  ]
+  {
+    "ID": 92,
+    "assign_status": "assigned",
+    "completion_date": "2025-09-22",
+    "completion_status": "completed",
+    "completion_time": "09:31:49.563869",
+    "employeeID": 36,
+    "employee_name": "Estes Esteban",
+    "label": "Order materials ",
+    "progress": 100,
+    "projectID": 120,
+    "task_deadline": "2025-09-30",
+    "task_description": "Nails 538-02 Plywood 554_98"
+  },
+  {
+    "ID": 92,
+    "assign_status": "assigned",
+    "completion_date": "2025-09-22",
+    "completion_status": "completed",
+    "completion_time": "09:31:49.563869",
+    "employeeID": 45,
+    "employee_name": "admin account",
+    "label": "Order materials ",
+    "progress": 100,
+    "projectID": 120,
+    "task_deadline": "2025-09-30",
+    "task_description": "Nails 538-02 Plywood 554_98"
+  }
 ]

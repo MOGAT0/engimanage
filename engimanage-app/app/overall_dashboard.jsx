@@ -45,19 +45,19 @@ const Overall_dashboard = () => {
     return (
       <View style={[styles.rankRow, { backgroundColor: bgColor }]}>
         <Text style={styles.rankNum}>{index + 1}</Text>
-        <Ionicons
+        {/* <Ionicons
           name="person-circle"
           size={32}
           color="#555"
           style={{ marginRight: 10 }}
-        />
+        /> */}
         <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
           <Text style={styles.empName}>
             {item.name} {medal && <Text>{medal}</Text>}
           </Text>
         </View>
         <Text style={styles.empPerf}>
-          ⭐{item.performance ? item.performance : 0}%
+          ⭐{item.performance}%
         </Text>
       </View>
     );
@@ -222,7 +222,30 @@ const Overall_dashboard = () => {
       if (data.ok) {
         console.log("projects");
         console.log(JSON.stringify(data.result));
-        setProjects(data.result);
+        // Sort by completed first, then progress, then avg_progress (all descending)
+        const sortedProjects = [...data.result].sort((a, b) => {
+          // Sort by completed tasks
+          if (b.completed !== a.completed) {
+            return b.completed - a.completed;
+          }
+
+          // If same, sort by progress
+          if (b.progress !== a.progress) {
+            return b.progress - a.progress;
+          }
+
+          // If still same, sort by avg_progress (if you have this value)
+          if (b.avg_progress !== a.avg_progress) {
+            return b.avg_progress - a.avg_progress;
+          }
+
+          //  If all same, maintain original order (stable sort fallback)
+          return 0;
+        });
+
+        setProjects(sortedProjects);
+
+
       } else {
         console.log(data.message);
       }
@@ -278,7 +301,7 @@ const Overall_dashboard = () => {
       {(activeTab === "employees" && employees.length > 0) && (
         <View style={{ flex: 1 }}>
           <Text style={styles.sectionTitle}>🏆 Top Performing Employees</Text>
-          <View style={styles.podiumContainer}>
+          {/* <View style={styles.podiumContainer}>
             <View style={styles.podiumBox}>
               <Text style={styles.rankLabel}>2nd</Text>
               <Ionicons name="person-circle" size={50} color="#C0C0C0" />
@@ -312,7 +335,7 @@ const Overall_dashboard = () => {
               />
               <Text style={styles.podiumText}>{employees[2]?.name}</Text>
             </View>
-          </View>
+          </View> */}
           
           {employees.length > 0 && (
             <>
@@ -424,8 +447,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 15,
     marginVertical: 5,
+    // borderBottomWidth:1,
     padding: 30,
-    borderRadius: 100,
     elevation: 2,
   },
   rankNum: { fontWeight: "bold", fontSize: 16, marginRight: 10 },
@@ -436,9 +459,8 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     right: 20,
-    backgroundColor: "#3118ea96",
+    backgroundColor: "#18181896",
     padding: 15,
-    borderRadius: 100,
     alignItems: "center",
     borderWidth: 1,
   },

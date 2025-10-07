@@ -448,7 +448,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
     }
   };
 
-  const formattedDeadline = deadline.toISOString().split("T")[0];
+  const formattedDeadline = deadline?.toISOString().split("T")[0];
 
   return (
     <View style={styles.container}>

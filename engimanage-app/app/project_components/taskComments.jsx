@@ -179,6 +179,7 @@ const TaskComments = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="Type your comment..."
+                  placeholderTextColor={"#888"}
                   value={comment}
                   onChangeText={setComment}
                   multiline
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor:"#0000003a",
   },
   keyboardView: {
     width: "100%",

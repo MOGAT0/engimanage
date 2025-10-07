@@ -19,6 +19,7 @@ import * as IntentLauncher from "expo-intent-launcher";
 import * as DocumentPicker from "expo-document-picker";
 import { Platform } from "react-native";
 import CustomHeader from "../components/customHeader";
+import prompt from "react-native-prompt-android";
 
 const link = globalScript;
 
@@ -33,6 +34,11 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
   const [fileLoading, setFileLoading] = useState(false);
   const [optionModalVisible, setOptionModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+
+  const [renameModalVisible, setRenameModalVisible] = useState(false);
+  const [renameInput, setRenameInput] = useState("");
+  const [copiedItem, setCopiedItem] = useState(null);
+  const [cutItem, setCutItem] = useState(null);
 
   useEffect(() => {
     fetchFiles(currentPath);
@@ -164,20 +170,12 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
         formData.append("fileType", fileCategory);
       });
 
-      // Include current path (optional)
       formData.append("saveFilePath", currentPath || "/");
 
-      // POST request
-      // const res = await fetch(`${link.api_link}/uploadfiles`, {
-      //   method: "POST",
-      //   headers: {
-      //     Accept: "application/json",
-      //   },
-      //   body: formData,
-      // });
-      
       const res = await fetch(
-        `${link.api_link}/uploadfiles?saveFilePath=${encodeURIComponent(currentPath || "/")}`,
+        `${link.api_link}/uploadfiles?saveFilePath=${encodeURIComponent(
+          currentPath || "/"
+        )}`,
         {
           method: "POST",
           headers: {
@@ -186,7 +184,6 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
           body: formData,
         }
       );
-
 
       const data = await res.json();
 
@@ -203,14 +200,14 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
       }
     } catch (err) {
       console.log("File upload error:", err);
-      Alert.alert("Upload Failed",err.message || "")
+      Alert.alert("Upload Failed", err.message || "");
     }
   };
 
   return (
     <View style={styles.container}>
       <CustomHeader
-        title="Project Files"
+        title="Project Files (Public)"
         routePath={homeRoute}
         backName="Home"
       />
@@ -290,14 +287,24 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
         animationType="fade"
         onRequestClose={() => setOptionModalVisible(false)}
       >
-        <View style={styles.actionsModalOverlay} onPress={()=> {setOptionModalVisible(false)}} >
+        <View
+          style={styles.actionsModalOverlay}
+          onPress={() => {
+            setOptionModalVisible(false);
+          }}
+        >
           <View style={styles.optionModal}>
             <Text style={styles.modalTitle}>Options</Text>
 
             <TouchableOpacity
               style={styles.optionRow}
               onPress={() => {
-                /* handle copy */
+                setCopiedItem(selectedItem);
+                setOptionModalVisible(false);
+                Alert.alert(
+                  "Copied",
+                  `"${selectedItem.name}" is copied. Navigate to destination folder and paste it.`
+                );
               }}
             >
               <Ionicons
@@ -312,11 +319,16 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
             <TouchableOpacity
               style={styles.optionRow}
               onPress={() => {
-                /* handle move */
+                setCutItem(selectedItem);
+                setOptionModalVisible(false);
+                Alert.alert(
+                  "Move Mode",
+                  `"${selectedItem.name}" is ready to move. Navigate to the destination and paste it.`
+                );
               }}
             >
               <Ionicons
-                name="move-outline"
+                name="cut-outline"
                 size={20}
                 color="#fff"
                 style={styles.icon}
@@ -327,7 +339,8 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
             <TouchableOpacity
               style={styles.optionRow}
               onPress={() => {
-                /* handle rename */
+                setRenameInput(selectedItem?.name || "");
+                setRenameModalVisible(true);
               }}
             >
               <Ionicons
@@ -342,7 +355,48 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
             <TouchableOpacity
               style={styles.optionRow}
               onPress={() => {
-                /* handle delete */
+                Alert.alert(
+                  "Confirm Delete",
+                  `Are you sure you want to delete "${selectedItem.name}"?`,
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Delete",
+                      style: "destructive",
+                      onPress: async () => {
+                        try {
+                          const res = await fetch(
+                            `${link.api_link}/delete_item`,
+                            {
+                              method: "DELETE",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ path: selectedItem.path }),
+                            }
+                          );
+                          const data = await res.json();
+
+                          if (res.ok && data.ok) {
+                            Alert.alert(
+                              "Deleted",
+                              `"${selectedItem.name}" removed successfully.`
+                            );
+                            fetchFiles(currentPath);
+                          } else {
+                            Alert.alert(
+                              "Error",
+                              data.message || "Unable to delete item."
+                            );
+                          }
+                        } catch (err) {
+                          console.log("Delete error:", err);
+                          Alert.alert("Error", "Something went wrong.");
+                        } finally {
+                          setOptionModalVisible(false);
+                        }
+                      },
+                    },
+                  ]
+                );
               }}
             >
               <Ionicons
@@ -400,6 +454,86 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
               <Ionicons name="close" size={22} color="red" />
               <Text style={[styles.actionText, { color: "red" }]}>Cancel</Text>
             </TouchableOpacity>
+
+            {copiedItem && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={async () => {
+                  setModalVisible(false);
+                  try {
+                    const res = await fetch(`${link.api_link}/copy_item`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        sourcePath: copiedItem.path,
+                        destinationPath: currentPath || "/",
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                      Alert.alert("Success", "Item pasted successfully!");
+                      setCopiedItem(null);
+                      fetchFiles(currentPath);
+                    } else {
+                      Alert.alert(
+                        "Error",
+                        data.message || "Failed to paste item"
+                      );
+                    }
+                  } catch (err) {
+                    console.log("Paste error:", err);
+                    Alert.alert("Error", "Failed to paste item");
+                  }
+                }}
+              >
+                <Ionicons name="clipboard-outline" size={22} color="#331177" />
+                <Text style={styles.actionText}>Paste</Text>
+              </TouchableOpacity>
+            )}
+
+            {cutItem && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={async () => {
+                  setModalVisible(false);
+                  try {
+                    const res = await fetch(`${link.api_link}/move_item`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        sourcePath: cutItem.path,
+                        destinationPath: currentPath || "/",
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                      Alert.alert("Success", "Item moved successfully!");
+                      setCutItem(null);
+                      fetchFiles(currentPath);
+                    } else {
+                      Alert.alert(
+                        "Error",
+                        data.message || "Failed to move item"
+                      );
+                    }
+                  } catch (err) {
+                    console.log("Move error:", err);
+                    Alert.alert("Error", "Failed to move item");
+                  }
+                }}
+              >
+                <Ionicons
+                  name="swap-horizontal-outline"
+                  size={22}
+                  color="#331177"
+                />
+                <Text style={styles.actionText}>Paste (Move)</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>
@@ -427,6 +561,65 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
               <TouchableOpacity
                 style={[styles.button, styles.cancelButton]}
                 onPress={() => setFolderModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Rename Modal */}
+      <Modal visible={renameModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Rename</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter new name"
+              value={renameInput}
+              onChangeText={setRenameInput}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={async () => {
+                  if (!renameInput.trim()) return;
+
+                  try {
+                    const res = await fetch(`${link.api_link}/rename_item`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        oldPath: selectedItem.path,
+                        newName: renameInput.trim(),
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.ok) {
+                      Alert.alert("Success", "Item renamed successfully!");
+                      fetchFiles(currentPath);
+                    } else {
+                      Alert.alert("Error", data.message || "Rename failed");
+                    }
+                  } catch (err) {
+                    console.log("Rename error:", err);
+                    Alert.alert("Error", "Failed to rename item");
+                  } finally {
+                    setRenameModalVisible(false);
+                    setOptionModalVisible(false);
+                  }
+                }}
+              >
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => setRenameModalVisible(false)}
               >
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>

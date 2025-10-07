@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useCallback  } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ImageBackground,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -28,10 +29,12 @@ const Profile = () => {
   const [pass, setPass] = useState(null);
   const [fullname, setFullname] = useState("");
   const [role, setRole] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const getLogin = async () => {
       try {
+        setRefreshing(true);
         const userData = await SecureStore.getItemAsync("loginData");
         console.log(userData);
 
@@ -50,6 +53,8 @@ const Profile = () => {
         }
       } catch (error) {
         console.log(error);
+      } finally{
+        setRefreshing(false);
       }
     };
     getLogin();
@@ -59,6 +64,7 @@ const Profile = () => {
     if (!ID) return console.log("No ID");
 
     try {
+      setRefreshing(true);
       const response = await fetch(`${link.api_link}/getProfileImg`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,6 +78,8 @@ const Profile = () => {
       }
     } catch (error) {
       console.log(error);
+    } finally{
+      setRefreshing(false);
     }
   };
 
@@ -197,37 +205,59 @@ const Profile = () => {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    
+    await updateDisplay(userID);
+    await getLogin();
+
+    Toast.success("Profile refreshed");
+  }, [userID]);
+
   return (
-    <ImageBackground
-      style={styles.root}
-      source={{ uri: `${link.serverLink}/assets/bg5.png` }}
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={["#4CAF50"]}
+          tintColor="#4CAF50"
+          title="Refreshing..."
+        />
+      }
     >
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.profileIMG} onPress={pickImage}>
-          <Image
-            style={styles.profileImageStyle}
-            source={
-              success && profile
-                ? { uri: profile }
-                : require("../assets/user.png")
-            }
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.userName}>{fullname.replace(/_/g, " ")}</Text>
-
-        {/* {role.replace(/_/g, " ")} */}
-        <Text style={styles.userRole}></Text>
-
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.actions}>
-          <Option
-            icon="notifications-outline"
-            label="Notifications"
-            onPress={() => router.navigate("/notif?homeRoute_parameter=tabsHandler`")}
+      <ImageBackground
+        style={styles.root}
+        source={{ uri: `${link.serverLink}/assets/bg5.png` }}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.profileIMG} onPress={pickImage}>
+            <Image
+              style={styles.profileImageStyle}
+              source={
+                success && profile
+                  ? { uri: profile }
+                  : require("../assets/user.png")
+              }
             />
-          {/*
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.userName}>{fullname.replace(/_/g, " ")}</Text>
+
+          {/* {role.replace(/_/g, " ")} */}
+          <Text style={styles.userRole}></Text>
+
+          <View style={styles.actions}>
+            <Option
+              icon="notifications-outline"
+              label="Notifications"
+              onPress={() =>
+                router.navigate("/notif?homeRoute_parameter=tabsHandler`")
+              }
+            />
+            {/*
           <Option
             icon="create-outline"
             label="Edit Name"
@@ -243,21 +273,22 @@ const Profile = () => {
             label="Change Email"
             onPress={() => alert("Change Email")}
           /> */}
-          <Option
-            icon="log-out-outline"
-            label="Logout"
-            onPress={setUserActivity}
-            textColor="#e53935"
-          />
-        </ScrollView>
-      </View>
-      <Container
-        position="top"
-        showCloseIcon={true}
-        duration={1500}
-        style={{ width: "200" }}
-      />
-    </ImageBackground>
+            <Option
+              icon="log-out-outline"
+              label="Logout"
+              onPress={setUserActivity}
+              textColor="#e53935"
+            />
+          </View>
+        </View>
+        <Container
+          position="top"
+          showCloseIcon={true}
+          duration={1500}
+          style={{ width: "200" }}
+        />
+      </ImageBackground>
+    </ScrollView>
   );
 };
 
@@ -313,7 +344,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowRadius: 10,
     elevation: 5,
-    height: 1000,
+    height: 550,
   },
   userName: {
     fontSize: 24,

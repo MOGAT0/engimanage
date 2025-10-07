@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, Alert } from "react-native";
+import { StyleSheet, Text, View, ScrollView, Alert,TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import DataSecureStorage from "./components/DataSecureStorage";
 import globalScript from "./globals/globalScript";
@@ -110,7 +110,18 @@ const Notif = ({ projectID, homeRoute, userType }) => {
           switch (n.notif_category) {
             case "overdue":
               return (
-                <View key={n.notif_id} style={styles.notif_alert}>
+                <TouchableOpacity 
+                  onPress={() =>
+                    router.navigate({
+                      pathname: "project_components/taskView",
+                      params: {
+                        task_id: n.task_id,
+                      },
+                    })
+                  }
+                  key={n.notif_id} 
+                  style={styles.notif_alert}
+                >
                   <View style={{ marginRight: 12 }}>
                     <Ionicons name="alert-circle" size={30} color="red" />
                   </View>
@@ -130,12 +141,22 @@ const Notif = ({ projectID, homeRoute, userType }) => {
                         : "Just now"}
                     </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
 
             case "completed":
               return (
-                <View key={n.notif_id} style={[styles.notif_alert,{borderColor:"green"}]}>
+                <TouchableOpacity 
+                  onPress={() =>
+                    router.navigate({
+                      pathname: "project_components/taskView",
+                      params: {
+                        task_id: n.task_id,
+                      },
+                    })
+                  }
+                  key={n.notif_id} 
+                  style={[styles.notif_alert,{borderColor:"green"}]}>
                   <View style={{ marginRight: 12 }}>
                     <Ionicons name="checkmark-circle" size={30} color="green" />
                   </View>
@@ -155,7 +176,7 @@ const Notif = ({ projectID, homeRoute, userType }) => {
                         : "Just now"}
                     </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
 
             default:

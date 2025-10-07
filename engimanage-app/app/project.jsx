@@ -16,7 +16,8 @@ import Dialog from "react-native-dialog";
 import { router } from "expo-router";
 import Br from "./components/spacer";
 import * as SecureStore from "expo-secure-store";
-import Containers, { Toast } from "toastify-react-native";
+// import Containers, { Toast } from "toastify-react-native";
+import Toast, { BaseToast,ErrorToast,SuccessToast,InfoToast } from "react-native-toast-message";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import globalScript from "./globals/globalScript";
@@ -252,11 +253,24 @@ const Project = () => {
         projectManager !== ""
       ) {
         // Alert.alert("Success","Created Successfully");
-        Toast.success("Created Successfully");
+        // Toast.success("Created Successfully");
+        Toast.show({
+          type: "success",
+          text1: "Created Successfully",
+          text2: "Project created Successfully",
+          visibilityTime:2000
+        })
         await updateLogin();
         await userProjects();
         await getothersproject();
         await fetchProjects();
+      } else{
+        Toast.show({
+          type: "error",
+          text1: "Create failed",
+          text2: "Unable to create project",
+          visibilityTime:2000
+        })
       }
     } catch (err) {
       console.error(err);
@@ -269,7 +283,13 @@ const Project = () => {
   // request join --------------------------------------->
   const handleJoin = async () => {
     if (!joinPin) {
-      Toast.error("Empty field");
+      // Toast.error("Empty field");
+      Toast.show({
+        type: "error",
+        text1: "Empty field",
+        text2: "All field are required",
+        visibilityTime:2000
+      })
       return;
     }
 
@@ -287,7 +307,13 @@ const Project = () => {
       const data = await response.json();
 
       if (data.ok) {
-        Toast.success(data.message);
+        // Toast.success(data.message);
+        Toast.show({
+          type: "success",
+          text1: "Success",
+          text2: `${data.message}`,
+          visibilityTime:2000
+        })
         updateLogin();
         userProjects();
       }
@@ -326,7 +352,13 @@ const Project = () => {
           setIsClickedLoading(false);
         }
       } else {
-        Toast.info("Unauthorized");
+        // Toast.info("Unauthorized");
+        Toast.show({
+          type: "info",
+          text1: "Unauthorized",
+          text2: "Action not allowed",
+          visibilityTime:2000
+        })
         setIsClickedLoading(false);
       }
     } catch (error) {
@@ -352,10 +384,22 @@ const Project = () => {
       const data = await response.json();
 
       if (data.ok) {
-        Toast.success("Request Sent");
+        // Toast.success("Request Sent");
+        Toast.show({
+          type: "success",
+          text1: "Request Sent",
+          text2: "Request Sent Successfully to project's TL",
+          visibilityTime:2000
+        })
         setJoinpopup(false);
       } else {
-        Toast.error("Request Failed");
+        // Toast.error("Request Failed");
+        Toast.error({
+          type: "error",
+          text1: "Request Failed",
+          text2: `${data.message}`,
+          visibilityTime:2000
+        })
         setJoinpopup(false);
       }
     } catch (error) {
@@ -369,9 +413,54 @@ const Project = () => {
     return projects;
   };
 
+  const toastConfig = {
+    success: (props) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: "#4CAF50" }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+        }}
+        text2Style={{
+          fontSize: 13,
+        }}
+      />
+    ),
+
+    error: (props) => (
+      <ErrorToast
+        {...props}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+        }}
+        text2Style={{
+          fontSize: 13,
+        }}
+      />
+    ),
+
+    info: (props) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: "#2196F3" }} // 💙 blue info color
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+        }}
+        text2Style={{
+          fontSize: 13,
+        }}
+      />
+    ),
+  };
+
   return (
     <View style={styles.container}>
-      <Containers position={"top"} duration={1000} style={{ width: "300" }} />
+      {/* <Containers position={"top"} duration={1000} style={{ width: "300" }} /> */}
 
       <Text style={styles.title}>Projects</Text>
       <View style={styles.filterContainer}>
@@ -576,7 +665,7 @@ const Project = () => {
             handleCreateProject();
             setProjectName("");
             setDesc("");
-            setProjectDeadline(new Date()); // reset after submit
+            setProjectDeadline(new Date());
             setCreatepopup(false);
           }}
         />
@@ -608,7 +697,8 @@ const Project = () => {
             setJoinpopup(false);
           }}
         />
-        {!popUp && (
+        <Text>{(!popUp && !joinpopUp ? "true" : "false") }</Text>
+        {(!popUp) && (
           <Dialog.Button
             label="Request Join"
             onPress={() => send_request_join(selectedProjectID, userID)}
@@ -630,6 +720,7 @@ const Project = () => {
           </View>
         </Modal>
       )}
+      <Toast config={toastConfig}/>
     </View>
   );
 };

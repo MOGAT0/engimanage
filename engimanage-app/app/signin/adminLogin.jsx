@@ -24,6 +24,7 @@ export default function AdminLogin() {
   const [pass, setPass] = useState("");
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(true);
+  const [loginLoading,setLoginLoading] = useState(false);
 
   useEffect(() => {
     // SecureStore.deleteItemAsync("adminLoginData")
@@ -80,6 +81,7 @@ export default function AdminLogin() {
     }
 
     try {
+      setLoginLoading(true)
       const reqData = { email, pass };
 
       const response = await fetch(API_LINK, {
@@ -104,6 +106,8 @@ export default function AdminLogin() {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoginLoading(false)
     }
   };
 
@@ -167,8 +171,9 @@ export default function AdminLogin() {
               <TouchableOpacity
                 style={styles.loginButton}
                 onPress={handleLogin}
+                disabled={loginLoading}
               >
-                <Text style={styles.loginButtonText}>Admin Login</Text>
+                <Text style={styles.loginButtonText}>{loginLoading ? "logging in..." : "Admin Login"}</Text>
               </TouchableOpacity>
             </View>
           </View>

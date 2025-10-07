@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, router } from "expo-router";
-import Container, { Toast } from "toastify-react-native";
+// import Container, { Toast } from "toastify-react-native";
+import Toast, { BaseToast,ErrorToast,SuccessToast,InfoToast } from "react-native-toast-message";
 import PasswordField from "../components/passwordField";
 import * as SecureStore from "expo-secure-store";
 import {
@@ -12,6 +13,7 @@ import {
   Image,
   ActivityIndicator,
   Modal,
+  Alert,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -25,6 +27,52 @@ export default function LoginScreen() {
   const [pass, setPass] = useState("");
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(true);
+  const [loginLoading,setLoginLoading] = useState(false);
+
+  const toastConfig = {
+    success: (props) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: "#4CAF50" }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+        }}
+        text2Style={{
+          fontSize: 13,
+        }}
+      />
+    ),
+
+    error: (props) => (
+      <ErrorToast
+        {...props}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+        }}
+        text2Style={{
+          fontSize: 13,
+        }}
+      />
+    ),
+
+    info: (props) => (
+      <BaseToast
+        {...props}
+        style={{ borderLeftColor: "#2196F3" }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          fontSize: 15,
+          fontWeight: "bold",
+        }}
+        text2Style={{
+          fontSize: 13,
+        }}
+      />
+    ),
+  };
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -76,11 +124,18 @@ export default function LoginScreen() {
     e.preventDefault();
     
     if (email === "" || pass === "") {
-      Toast.error("Empty Fields");
+      // Toast.error("Empty Fields");
+      Toast.show({
+        type: "error",
+        text1: "Missing Credentials",
+        text2: "Please enter your email or password",
+        visibilityTime:2000
+      });
       return;
     }
     
     try {
+      setLoginLoading(true)
       const reqData = { email, pass };
       
       const response = await fetch(API_LINK, {
@@ -95,6 +150,7 @@ export default function LoginScreen() {
       const data = await response.json();
       
       if (response.ok && Object.keys(data).length >= 1) {
+        Alert.alert("Success","Login Successfully")
         setShowModal(false)
         await saveLogin("loginData", data[0]);
         setUserActivity(data[0].ID);
@@ -102,10 +158,18 @@ export default function LoginScreen() {
         setPass("");
         router.navigate("/tabsHandler");
       } else {
-        Toast.warn("Invalid Credentials");
+        // Toast.warn("Invalid Credentials");
+        Toast.show({
+          type: "info",
+          text1: "Invalid Credentials",
+          text2: "Incorrect Email or Password",
+          visibilityTime:2000
+        })
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoginLoading(false)
     }
   };
 
@@ -142,7 +206,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.screen}>
-      <Container position="top" showCloseIcon={true} duration={1500} style={{ width: "200" }} />
+      {/* <Container position="top" showCloseIcon={true} duration={1500} style={{ width: "200" }} /> */}
       <Modal
         transparent
         visible={showModal}
@@ -174,13 +238,14 @@ export default function LoginScreen() {
                 iconColor={"#331177"}
                 iconSize={30}
               />
-              <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                <Text style={styles.loginButtonText}>Log in</Text>
+              <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loginLoading}>
+                <Text style={styles.loginButtonText}>{loginLoading ? "logging in..." : "log in"}</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+      <Toast config={toastConfig}/>
     </View>
   );
 }

@@ -13,7 +13,7 @@ const RootLayout = () => {
 
   const updateUserStatus = async (user_status) => {
     try {
-      console.log(`current status:${user_status}`);
+      // console.log(`current status:${user_status}`);
       const userData = await DataSecureStorage.getItem("loginData");
 
       if (!userData) {
@@ -23,12 +23,12 @@ const RootLayout = () => {
 
       const parsedData = JSON.parse(userData);
 
-      console.log(
-        JSON.stringify({
-          userID: parsedData.ID,
-          status: user_status,
-        })
-      );
+      // console.log(
+      //   JSON.stringify({
+      //     userID: parsedData.ID,
+      //     status: user_status,
+      //   })
+      // );
 
       const response = await fetch(`${link.api_link}/updateUserStatus`, {
         method: "POST",
@@ -43,7 +43,7 @@ const RootLayout = () => {
 
       const resdata = await response.json();
 
-      console.log("Status update response:", resdata);
+      // console.log("Status update response:", resdata);
     } catch (error) {
       console.log("Failed to update user status:", error);
     }
@@ -51,7 +51,7 @@ const RootLayout = () => {
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState) => {
-      console.log(nextAppState);
+      // console.log(nextAppState);
       if (nextAppState === "active") {
         setIsAppActive(true);
         updateUserStatus("active");
@@ -59,7 +59,7 @@ const RootLayout = () => {
         setIsAppActive(false);
         updateUserStatus("inactive");
       } else if (nextAppState === "inactive") {
-        console.log("App is transitioning (inactive)");
+        // console.log("App is transitioning (inactive)");
         updateUserStatus("inactive");
       }
       appState.current = nextAppState;
