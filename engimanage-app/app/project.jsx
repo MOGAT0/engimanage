@@ -691,13 +691,13 @@ const Project = () => {
         ></Dialog.Input>
         <Dialog.Button label="Cancel" onPress={() => setJoinpopup(false)} />
         <Dialog.Button
-          label="Submit"
+          label="Submit Pin"
           onPress={() => {
             handleJoin();
             setJoinpopup(false);
           }}
         />
-        <Text>{(!popUp && !joinpopUp ? "true" : "false") }</Text>
+        {/* <Text>{(!popUp && !joinpopUp ? "true" : "false") }</Text> */}
         {(!popUp) && (
           <Dialog.Button
             label="Request Join"

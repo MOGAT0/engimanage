@@ -274,11 +274,34 @@ const Task = ({ projectID, homeRoute, userType }) => {
       if (data.ok) {
         // Toast.success("Task deleted successfully");
         handleGetTasks();
+        evaluate_employee();
       } else {
         Toast.error(data.message || "Failed to delete task");
       }
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const evaluate_employee = async () => {
+    try {
+      const response = await fetch(`${link.api_link}/employee_evaluation`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        console.log(data.message);
+      } else {
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 

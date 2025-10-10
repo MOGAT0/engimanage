@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useCallback  } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   ImageBackground,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -30,13 +31,13 @@ const Profile = () => {
   const [fullname, setFullname] = useState("");
   const [role, setRole] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
 
   useEffect(() => {
     const getLogin = async () => {
       try {
         setRefreshing(true);
         const userData = await SecureStore.getItemAsync("loginData");
-        console.log(userData);
 
         const data = JSON.parse(userData);
         if (data) {
@@ -53,7 +54,7 @@ const Profile = () => {
         }
       } catch (error) {
         console.log(error);
-      } finally{
+      } finally {
         setRefreshing(false);
       }
     };
@@ -73,12 +74,12 @@ const Profile = () => {
       const data = await response.json();
 
       if (data[0].profile_image) {
-        setProfile(`${link.serverLink}${data[0].profile_image}`);
+        setProfile(data[0].profile_image);
         setSuccess(true);
       }
     } catch (error) {
       console.log(error);
-    } finally{
+    } finally {
       setRefreshing(false);
     }
   };
@@ -129,8 +130,6 @@ const Profile = () => {
   };
 
   const updateProfileImg = async (imageUri, ID) => {
-    console.log(`User ID: ${ID}`);
-
     if (!imageUri || !ID) return console.log("Missing image or user ID");
 
     const fileName = imageUri.split("/").pop();
@@ -159,7 +158,7 @@ const Profile = () => {
       const data = await response.json();
 
       if (response.ok && data.ok) {
-        setProfile(`${link.api_link}${data.path}`);
+        setProfile(data.path);
         updateDisplay(userID);
         Toast.success("Profile Changed Successfully");
       } else {
@@ -206,7 +205,6 @@ const Profile = () => {
   };
 
   const onRefresh = useCallback(async () => {
-    
     await updateDisplay(userID);
     await getLogin();
 
@@ -216,6 +214,7 @@ const Profile = () => {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
+      scrollEnabled={false}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -232,14 +231,24 @@ const Profile = () => {
       >
         <View style={styles.header}>
           <TouchableOpacity style={styles.profileIMG} onPress={pickImage}>
-            <Image
-              style={styles.profileImageStyle}
-              source={
-                success && profile
-                  ? { uri: profile }
-                  : require("../assets/user.png")
-              }
-            />
+            <View style={{ flex: 1 }}>
+              {imageLoading && (
+                <View style={styles.loadingOverlay}>
+                  <ActivityIndicator size="large" color="#4CAF50" />
+                </View>
+              )}
+              <Image
+                style={styles.profileImageStyle}
+                source={
+                  success && profile
+                    ? { uri: profile }
+                    : require("../assets/user.png")
+                }
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+              />
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -344,7 +353,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowRadius: 10,
     elevation: 5,
-    height: 550,
+    height: 600,
   },
   userName: {
     fontSize: 24,
@@ -378,6 +387,13 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: "#333",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.6)", // slight transparency
+    zIndex: 2,
   },
 });
 

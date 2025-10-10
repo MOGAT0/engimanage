@@ -549,7 +549,7 @@ const ManagementPage = ({ projectID, homeRoute, userType }) => {
               <Image
                 source={{
                   uri: member.profile_image
-                    ? `${link.serverLink}/${member.profile_image}`
+                    ? member.profile_image
                     : `${link.serverLink}/profile/user.png`,
                 }}
                 style={styles.memberImage}

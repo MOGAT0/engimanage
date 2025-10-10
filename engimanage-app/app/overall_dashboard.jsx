@@ -19,15 +19,44 @@ const Overall_dashboard = () => {
   const [activeTab, setActiveTab] = useState("projects");
   const [refreshingEmployees, setRefreshingEmployees] = useState(false);
   const [refreshingProjects, setRefreshingProjects] = useState(false);
-
-  // temp data for employee
   const [employees, setemployee] = useState([]);
   const [yourRank, setYourRank] = useState({});
   const [yourPosition, setYourPosition] = useState("~");
   const [userinfo, setUserinfo] = useState(null);
 
+  const NoProjects = () => (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="briefcase-outline" size={64} color="#aaa" />
+      <Text style={styles.emptyTitle}>No Productive Projects</Text>
+      <Text style={styles.emptyMessage}>
+        No project has completed a task yet
+      </Text>
+      <Text style={{ fontSize: 13, color: "#c33f3fff", marginTop: 10 }}>
+        (reload for upadates)
+      </Text>
+    </View>
+  );
 
-  
+  const NoRanking = () => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: 50,
+        }}
+      >
+        <Ionicons name="trophy-outline" size={50} color="#ccc" />
+        <Text style={{ fontSize: 16, color: "#888", marginTop: 10 }}>
+          No employee rankings yet
+        </Text>
+        <Text style={{ fontSize: 13, color: "#c33f3fff", marginTop: 10 }}>
+          (reload for upadates)
+        </Text>
+      </View>
+    );
+  };
 
   const renderEmployeeRow = ({ item, index }) => {
     let bgColor = "#fff";
@@ -56,9 +85,7 @@ const Overall_dashboard = () => {
             {item.name} {medal && <Text>{medal}</Text>}
           </Text>
         </View>
-        <Text style={styles.empPerf}>
-          ⭐{item.performance}%
-        </Text>
+        <Text style={styles.empPerf}>⭐{item.performance}%</Text>
       </View>
     );
   };
@@ -149,20 +176,21 @@ const Overall_dashboard = () => {
 
   useEffect(() => {
     getUserInfo();
-  }, []);
-
-  useEffect(()=>{
-    if(projects.length === 0){
-      get_taks_info();
-    }
-
-  },[projects])
-
-  useEffect(() => {
-    if (userinfo && employees.length === 0) {
+    get_taks_info();
+    if (userinfo) {
       fetch_ranking_info();
     }
-  }, [userinfo, employees]);
+  }, []);
+
+  // useEffect(()=>{
+  //   if(projects.length === 0){
+  //   }
+
+  // },[])
+
+  // useEffect(() => {
+
+  // }, [userinfo, employees]);
 
   const getUserInfo = async () => {
     const data = await DataSecureStorage.getItem("loginData");
@@ -173,8 +201,8 @@ const Overall_dashboard = () => {
   };
 
   const fetch_ranking_info = async () => {
-    setRefreshingEmployees(true);
     try {
+      setRefreshingEmployees(true);
       const response = await fetch(`${link.api_link}/get_employee_ranking`, {
         method: "POST",
         headers: {
@@ -187,9 +215,9 @@ const Overall_dashboard = () => {
 
       if (data.ok) {
         console.log("employee");
-        
+
         console.log(data.result);
-        
+
         setemployee(data.result);
         setYourRank(data.result.find((a) => a.employee_id === userinfo.ID));
         setYourPosition(
@@ -207,8 +235,8 @@ const Overall_dashboard = () => {
   };
 
   const get_taks_info = async () => {
-    setRefreshingProjects(true);
     try {
+      setRefreshingProjects(true);
       const response = await fetch(`${link.api_link}/get_projectRanking`, {
         method: "POST",
         headers: {
@@ -244,18 +272,15 @@ const Overall_dashboard = () => {
         });
 
         setProjects(sortedProjects);
-
-
       } else {
         console.log(data.message);
       }
     } catch (error) {
       console.log(error);
-    } finally{
+    } finally {
       setRefreshingProjects(false);
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -298,7 +323,7 @@ const Overall_dashboard = () => {
       </View>
 
       {/* Employees */}
-      {(activeTab === "employees" && employees.length > 0) && (
+      {activeTab === "employees" && (
         <View style={{ flex: 1 }}>
           <Text style={styles.sectionTitle}>🏆 Top Performing Employees</Text>
           {/* <View style={styles.podiumContainer}>
@@ -336,19 +361,20 @@ const Overall_dashboard = () => {
               <Text style={styles.podiumText}>{employees[2]?.name}</Text>
             </View>
           </View> */}
-          
-          {employees.length > 0 && (
+
+          <FlatList
+            data={employees}
+            keyExtractor={(item) => item.employee_id}
+            renderItem={renderEmployeeRow}
+            contentContainerStyle={{ paddingBottom: 100, paddingTop: 15 }}
+            refreshing={refreshingEmployees}
+            onRefresh={fetch_ranking_info}
+            ListEmptyComponent={<NoRanking />}
+          />
+          {/* {employees.length > 0 && (
             <>
-            <FlatList
-              data={employees}
-              keyExtractor={(item) => item.employee_id}
-              renderItem={renderEmployeeRow}
-              contentContainerStyle={{ paddingBottom: 100, paddingTop: 15 }}
-              refreshing={refreshingEmployees}
-              onRefresh={fetch_ranking_info}
-              />
             </>
-          )}
+          )} */}
 
           <View style={styles.yourRankBox}>
             {yourRank ? (
@@ -395,6 +421,7 @@ const Overall_dashboard = () => {
             contentContainerStyle={{ paddingBottom: 40 }}
             refreshing={refreshingProjects}
             onRefresh={get_taks_info}
+            ListEmptyComponent={<NoProjects />}
           />
         </View>
       )}
@@ -527,4 +554,24 @@ const styles = StyleSheet.create({
   },
   taskText: { fontSize: 14, fontWeight: "500", color: "#333" },
   taskStatus: { fontSize: 13, fontWeight: "600" },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#444",
+    marginTop: 10,
+  },
+  emptyMessage: {
+    fontSize: 15,
+    color: "#777",
+    marginTop: 6,
+    textAlign: "center",
+    maxWidth: 250,
+    lineHeight: 20,
+  },
 });

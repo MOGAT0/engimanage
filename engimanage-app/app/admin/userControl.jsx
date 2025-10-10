@@ -63,6 +63,9 @@ const UserControl = () => {
         body: JSON.stringify({ query }),
       });
       const data = await res.json();
+      console.log('====================================');
+      console.log("users: ", data);
+      console.log('====================================');
       setUsers(data);
     } catch (err) {
       console.error(err);
@@ -145,7 +148,7 @@ const UserControl = () => {
     <View style={styles.userCard}>
       {item.profile_image ? (
         <Image
-          source={{ uri: `${globalScript.serverLink}${item.profile_image}` }}
+          source={{ uri: item.profile_image }}
           style={[
             styles.avatar,
             {

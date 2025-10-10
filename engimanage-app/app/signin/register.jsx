@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import React, { useState } from "react";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import Container, { Toast } from "toastify-react-native";
 import PasswordField from "../components/passwordField";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -15,7 +15,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import CustomHeader from "../components/customHeader";
 import globalScript from "../globals/globalScript";
 
-const link = globalScript
+const link = globalScript;
 const API_LINK = `${link.api_link}/register`;
 
 export default function RegisterScreen() {
@@ -28,16 +28,16 @@ export default function RegisterScreen() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newFname = fname.replace(/\s/g,'_')
-    const newLname = lname.replace(/\s/g,'_')
+    const newFname = fname.replace(/\s/g, "_");
+    const newLname = lname.replace(/\s/g, "_");
 
     try {
       const reqData = {
         email,
         password,
         confirmPass,
-        fname : newFname,
-        lname : newLname,
+        fname: newFname,
+        lname: newLname,
       };
 
       const response = await fetch(API_LINK, {
@@ -66,10 +66,15 @@ export default function RegisterScreen() {
       console.error(`server error: ${error}`);
     }
   };
+
   return (
     <View style={styles.screen}>
-      <Container position="top" style={{width:'fit_content',overflow:"hidden"}} showCloseIcon={false}/>
-      <CustomHeader/>
+      <Container
+        position="top"
+        style={{ width: "fit_content", overflow: "hidden" }}
+        showCloseIcon={false}
+      />
+      <CustomHeader />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
@@ -77,16 +82,19 @@ export default function RegisterScreen() {
       >
         <View style={styles.container}>
           <Text style={styles.title}>Create Account</Text>
+
           <View style={styles.form}>
             <TextInput
               style={styles.input}
               placeholder="Firstname"
+              placeholderTextColor="#999"
               value={fname}
               onChangeText={setFname}
             />
             <TextInput
               style={styles.input}
               placeholder="Lastname"
+              placeholderTextColor="#999"
               value={lname}
               onChangeText={setLname}
             />
@@ -94,6 +102,7 @@ export default function RegisterScreen() {
               style={styles.input}
               keyboardType="email-address"
               placeholder="Email"
+              placeholderTextColor="#999"
               value={email}
               onChangeText={setEmail}
             />
@@ -101,80 +110,72 @@ export default function RegisterScreen() {
               handleChange={setPassword}
               val={password}
               hintText={"Password"}
-              iconColor={"#331177"}
-              iconSize={30}
+              iconColor={"#00ADB5"}
+              iconSize={28}
             />
             <PasswordField
               handleChange={setConfirmPass}
               val={confirmPass}
-              hintText={"Confirm password"}
-              iconColor={"#331177"}
-              iconSize={30}
+              hintText={"Confirm Password"}
+              iconColor={"#00ADB5"}
+              iconSize={28}
             />
 
             <TouchableOpacity
               style={styles.registerButton}
               onPress={handleSubmit}
             >
+              <Ionicons name="person-add-outline" size={18} color="#fff" />
               <Text style={styles.registerButtonText}>Create</Text>
             </TouchableOpacity>
           </View>
 
+          {/* Optional bottom link */}
           {/* <Text style={styles.loginLabel}>
             Already have an account?
             <Link style={styles.loginLink} href={"./login"}>
               Login
             </Link>
           </Text> */}
-
-          {/* <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
-              <Ionicons name="logo-apple" size={18} color="#fff" />
-              <Text style={styles.socialText}>Register with Apple</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.socialButton, styles.googleButton]}
-            >
-              <Ionicons name="logo-google" size={18} color="#000" />
-              <Text style={[styles.socialText, { color: "#000" }]}>
-                Register with Google
-              </Text>
-            </TouchableOpacity>
-          </View> */}
-
         </View>
       </ScrollView>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#222831", // Dark background
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 40,
   },
-  screen: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   container: {
     width: 350,
     minHeight: 550,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    elevation: 3,
+    backgroundColor: "#393E46", // Slightly lighter dark card
+    borderRadius: 12,
+    padding: 25,
+    elevation: 6,
     alignSelf: "center",
     justifyContent: "center",
-    marginTop:-200
+    marginTop: -150,
+    shadowColor: "#000",
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
   },
   title: {
     textAlign: "center",
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "800",
+    color: "#EEEEEE",
     marginBottom: 25,
   },
   form: {
@@ -182,60 +183,42 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   input: {
-    borderRadius: 20,
-    borderColor: "#c0c0c0",
+    borderRadius: 10,
+    borderColor: "#555",
     borderWidth: 1,
     padding: 12,
     paddingHorizontal: 15,
     fontSize: 14,
+    backgroundColor: "#222831",
+    color: "#EEEEEE",
   },
   registerButton: {
-    backgroundColor: "#332277",
-    padding: 12,
-    borderRadius: 20,
-    marginTop: 10,
+    flexDirection: "row",
     alignItems: "center",
-    elevation: 3,
+    justifyContent: "center",
+    backgroundColor: "#00ADB5",
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
+    gap: 8,
+    elevation: 4,
   },
   registerButtonText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 16,
   },
   loginLabel: {
-    fontSize: 15,
-    color: "#747474",
+    fontSize: 14,
+    color: "#AAAAAA",
     textAlign: "center",
-    marginTop: 10,
+    marginTop: 15,
   },
   loginLink: {
-    color: "#332277",
+    color: "#00ADB5",
     textDecorationLine: "underline",
     fontWeight: "800",
     fontSize: 15,
-  },
-  buttonsContainer: {
-    marginTop: 20,
-    gap: 15,
-  },
-  socialButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 12,
-    borderRadius: 20,
-    justifyContent: "center",
-  },
-  socialText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  appleButton: {
-    backgroundColor: "#000",
-  },
-  googleButton: {
-    backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#747474",
+    marginLeft: 4,
   },
 });

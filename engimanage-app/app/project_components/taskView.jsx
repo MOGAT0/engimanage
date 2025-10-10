@@ -33,6 +33,10 @@ const TaskView = () => {
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState(null);
 
+  const [imageLoading, setImageLoading] = useState({});
+
+  const [istaskExist, setTaskExist] = useState(true);
+
   const { task_id } = useLocalSearchParams();
 
   useEffect(() => {
@@ -56,7 +60,11 @@ const TaskView = () => {
         body: JSON.stringify({ task_id }),
       });
       const data = await response.json();
+      console.log(data.data.length);
 
+      if (data.data.length === 0) {
+        setTaskExist(false);
+      }
       if (data.ok) {
         setTaskData(data.data || null);
 
@@ -96,7 +104,7 @@ const TaskView = () => {
 
       console.log("Picked files:", result.assets);
     } catch (err) {
-      console.error("Error picking file:", err);
+      console.log("Error picking file:", err);
     }
   };
 
@@ -140,8 +148,8 @@ const TaskView = () => {
         Alert.alert("Error", data.message || "Upload failed.");
       }
     } catch (err) {
-      console.error("Upload error:", err);
-      Alert.alert("Error", "An error occurred during upload.");
+      console.log("Upload error:", err);
+      Alert.alert("Error", "Network failed, try again");
     } finally {
       setIsLoading(false);
     }
@@ -164,7 +172,7 @@ const TaskView = () => {
 
       if (data.ok && Array.isArray(data.data) && data.data.length > 0) {
         const formattedFiles = data.data.map((file) => ({
-          uri: `${link.serverLink}/${file.file_path}`,
+          uri: `${file.file_path}`,
           name: file.original_name,
           mimeType: file.mime_type,
           id: file.id,
@@ -177,7 +185,7 @@ const TaskView = () => {
         setFetchedFiles([]); // clear in case no data
       }
     } catch (err) {
-      console.error("Error fetching uploaded images:", err);
+      console.log("Error fetching uploaded images:", err);
     } finally {
       setIsLoading(false);
     }
@@ -242,377 +250,483 @@ const TaskView = () => {
   //   console.log(
   //       taskData.find(task => task.employeeID === userInfo.ID));
   // }
-  // 
+  //
   // console.log("_-_-_-_")
   // console.log(taskData)
   // console.log("_-_-_-_")
   return (
     <View style={styles.container}>
-      <CustomHeader title={taskData?.find((task) => task.ID == task_id)?.label || "loading..."} />
+      {istaskExist ? (
+        <>
+          <CustomHeader
+            title={
+              taskData?.find((task) => task.ID == task_id)?.label ||
+              "loading..."
+            }
+          />
+          <ScrollView
+            nestedScrollEnabled={true}
+            contentContainerStyle={{ paddingBottom: 120 }}
+          >
+            {taskData &&
+            taskData.length > 0 &&
+            taskData.some((task) => task.assign_status !== "available") ? (
+              <>
+                <Text
+                  style={[
+                    styles.assignedText,
+                    { fontSize: 15, fontWeight: "bold" },
+                  ]}
+                >
+                  Deadline:
+                </Text>
+                <View style={styles.row}>
+                  <View style={styles.deadlineBox}>
+                    <Ionicons name="calendar-outline" size={18} color="#555" />
+                    <Text style={styles.deadlineText}>
+                      {taskData?.find((task) => task.ID == task_id)
+                        ?.task_deadline || "loading..."}
+                    </Text>
+                  </View>
+                </View>
 
-      <ScrollView
-        nestedScrollEnabled={true}
-        contentContainerStyle={{ paddingBottom: 120 }}
-      >
-        {taskData &&
-        taskData.length > 0 &&
-        taskData.some((task) => task.assign_status !== "available") ? (
-          <>
-            <Text
-              style={[
-                styles.assignedText,
-                { fontSize: 15, fontWeight: "bold" },
-              ]}
-            >
-              Deadline:
-            </Text>
-            <View style={styles.row}>
-              <View style={styles.deadlineBox}>
-                <Ionicons name="calendar-outline" size={18} color="#555" />
-                <Text style={styles.deadlineText}>{taskData?.find((task) => task.ID == task_id)?.task_deadline || "loading..."}</Text>
-              </View>
-            </View>
+                <TouchableOpacity
+                  onPress={handle_openComment}
+                  style={{
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Ionicons
+                    name="chatbox-ellipses-outline"
+                    color={"blue"}
+                    size={22}
+                  />
+                  <Text style={styles.commentDesign}> Comments</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handle_openComment}
-              style={{
-                justifyContent: "flex-start",
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <Ionicons
-                name="chatbox-ellipses-outline"
-                color={"blue"}
-                size={22}
-              />
-              <Text style={styles.commentDesign}> Comments</Text>
-            </TouchableOpacity>
-
-            <LinearGradient
-              colors={(() => {
-                const task = taskData?.find((task) => task.ID == task_id);
-                if (!task) return ["#9e9e9e", "#757575"];
-                if (task.progress === 100) return ["#4caf50", "#2e7d32"];
-                if (task.progress === 0 && task.completion_status === "overdue")
-                  return ["#f44336", "#d32f2f"];
-                return ["#ff9800", "#f57c00"];
-              })()}
-              style={styles.statusCard}
-            >
-              <Text
-                style={[
-                  styles.statusText,
-                  {
-                    color: (() => {
+                <LinearGradient
+                  colors={(() => {
+                    const task = taskData?.find((task) => task.ID == task_id);
+                    if (!task) return ["#9e9e9e", "#757575"];
+                    if (task.progress === 100) return ["#4caf50", "#2e7d32"];
+                    if (
+                      task.progress === 0 &&
+                      task.completion_status === "overdue"
+                    )
+                      return ["#f44336", "#d32f2f"];
+                    return ["#ff9800", "#f57c00"];
+                  })()}
+                  style={styles.statusCard}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      {
+                        color: (() => {
+                          const task = taskData?.find(
+                            (task) => task.ID == task_id
+                          );
+                          if (!task) return "#ffffff";
+                          if (task.progress === 100) return "#ffffff";
+                          if (
+                            task.progress === 0 &&
+                            task.completion_status === "overdue"
+                          )
+                            return "#ffffff";
+                          return "#ffffff";
+                        })(),
+                      },
+                    ]}
+                  >
+                    {(() => {
                       const task = taskData?.find((task) => task.ID == task_id);
-                      if (!task) return "#ffffff";
-                      if (task.progress === 100) return "#ffffff";
+                      if (!task) return "Task not found"; // optional
+                      if (task.progress === 100) return "Completed";
                       if (
                         task.progress === 0 &&
                         task.completion_status === "overdue"
                       )
-                        return "#ffffff";
-                      return "#ffffff";
-                    })(),
-                  },
-                ]}
-              >
-                {(() => {
-                  const task = taskData?.find((task) => task.ID == task_id);
-                  if (!task) return "Task not found"; // optional
-                  if (task.progress === 100) return "Completed";
-                  if (
-                    task.progress === 0 &&
-                    task.completion_status === "overdue"
-                  )
-                    return "Overdue";
-                  return "In Progress";
-                })()}
-              </Text>
-            </LinearGradient>
+                        return "Overdue";
+                      return "In Progress";
+                    })()}
+                  </Text>
+                </LinearGradient>
 
-            <View style={styles.descriptionBox}>
-              <Text style={styles.descriptionHeader}>Description</Text>
-              <Text style={styles.descriptionText}>
-                {taskData?.find((task) => task.ID == task_id)
-                  ?.task_description || "No description"}
-              </Text>
-            </View>
-            {/* display images */}
-            <View
-              style={{
-                backgroundColor: "#dfdfdfff",
-                marginTop: 40,
-                padding: 10,
-                borderRadius: 10,
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-                paddingBottom: 100,
-              }}
-            >
-              <Text style={{ marginBottom: 20, width: "100%" }}>
-                Attached Progress Files
-              </Text>
+                <View style={styles.descriptionBox}>
+                  <Text style={styles.descriptionHeader}>Description</Text>
+                  <Text style={styles.descriptionText}>
+                    {taskData?.find((task) => task.ID == task_id)
+                      ?.task_description || "No description"}
+                  </Text>
+                </View>
+                {/* display images */}
+                <View
+                  style={{
+                    backgroundColor: "#dfdfdfff",
+                    marginTop: 40,
+                    padding: 10,
+                    borderRadius: 10,
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "flex-start",
+                    // gap: 10,
+                    paddingBottom: 100,
+                  }}
+                >
+                  <Text style={{ marginBottom: 20, width: "100%" }}>
+                    Attached Progress Files
+                  </Text>
 
-              {fetchedFiles.length > 0 ? (
-                fetchedFiles.map((item, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={{
-                      width: "30%", // 3 per row
-                      aspectRatio: 1,
-                      marginBottom: 10,
-                    }}
-                    onPress={() => {
-                      if (item.uri) {
-                        setSelectedImageUri(item.uri);
-                        setImageModalVisible(true);
-                      }
-                    }}
-                  >
-                    {item.uri ? (
-                      <Image
-                        source={{ uri: item.uri }}
+                  {fetchedFiles.length > 0 ? (
+                    fetchedFiles.map((item, index) => (
+                      <TouchableOpacity
+                        key={index}
                         style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: 8,
+                          width: "30%",
+                          aspectRatio: 1,
+                          marginRight: (index + 1) % 3 === 0 ? 0 : 16,
+                          marginBottom: 10,
+                          position: "relative",
                         }}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <View
-                        style={{
-                          backgroundColor: "#ccc",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          flex: 1,
-                          borderRadius: 8,
+                        onPress={() => {
+                          if (item.uri) {
+                            setSelectedImageUri(item.uri);
+                            setImageModalVisible(true);
+                          }
                         }}
                       >
-                        <Ionicons
-                          name="document-outline"
-                          size={24}
-                          color="#555"
+                        {imageLoading[index] && (
+                          <View
+                            style={{
+                              ...StyleSheet.absoluteFillObject,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              backgroundColor: "rgba(0,0,0,0.2)",
+                              borderRadius: 8,
+                            }}
+                          >
+                            <ActivityIndicator size="small" color="#fff" />
+                          </View>
+                        )}
+
+                        {item.uri ? (
+                          <Image
+                            source={{ uri: item.uri }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: 8,
+                            }}
+                            resizeMode="cover"
+                            onLoadStart={() =>
+                              setImageLoading((prev) => ({
+                                ...prev,
+                                [index]: true,
+                              }))
+                            }
+                            onLoadEnd={() =>
+                              setImageLoading((prev) => ({
+                                ...prev,
+                                [index]: false,
+                              }))
+                            }
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              backgroundColor: "#ccc",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              flex: 1,
+                              borderRadius: 8,
+                            }}
+                          >
+                            <Ionicons
+                              name="document-outline"
+                              size={24}
+                              color="#555"
+                            />
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text
+                      style={{
+                        color: "#666",
+                        textAlign: "center",
+                        width: "100%",
+                      }}
+                    >
+                      No files uploaded
+                    </Text>
+                  )}
+                </View>
+              </>
+            ) : (
+              <>
+                <Text
+                  style={[
+                    styles.assignedText,
+                    { fontSize: 15, fontWeight: "bold" },
+                  ]}
+                >
+                  Deadline:
+                </Text>
+                <View style={styles.row}>
+                  <View style={styles.deadlineBox}>
+                    <Ionicons name="calendar-outline" size={18} color="#555" />
+                    <Text style={styles.deadlineText}>
+                      {taskData?.find((task) => task.ID == task_id)
+                        ?.task_deadline || "loading..."}
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  onPress={handle_openComment}
+                  style={{
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Ionicons
+                    name="chatbox-ellipses-outline"
+                    color={"blue"}
+                    size={22}
+                  />
+                  <Text style={styles.commentDesign}> Comments</Text>
+                </TouchableOpacity>
+
+                <LinearGradient
+                  colors={["#c75e5eff", "#dd0b0bff"]}
+                  style={styles.statusCard}
+                >
+                  <Text style={styles.notAssigned}>Not assigned</Text>
+                </LinearGradient>
+
+                <View style={styles.descriptionBox}>
+                  <Text style={styles.descriptionHeader}>Description</Text>
+                  <Text style={styles.descriptionText}>
+                    {taskData?.find((task) => task.ID == task_id)
+                      ?.task_description || "No description"}
+                  </Text>
+                </View>
+              </>
+            )}
+
+            {/* Slide Up Modal */}
+            <Modal
+              animationType="slide"
+              visible={modalVisible}
+              transparent={true}
+              onRequestClose={() => setModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                  <TouchableOpacity
+                    style={styles.closeBtn}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Ionicons name="close-circle" size={25} color="#c40000ff" />
+                  </TouchableOpacity>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text style={styles.modalTitle}>Upload Preview</Text>
+
+                    <TouchableOpacity
+                      style={styles.addFileBtn}
+                      onPress={pickFile}
+                    >
+                      <Ionicons
+                        name="cloud-upload-outline"
+                        size={24}
+                        color="#0F828C"
+                      />
+                      <Text style={{ color: "#0F828C" }}> Attach File</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <FlatList
+                    data={uploadedFiles}
+                    numColumns={3}
+                    keyExtractor={(item, index) => index.toString()}
+                    columnWrapperStyle={{ justifyContent: "flex-start" }}
+                    renderItem={({ item, index }) => (
+                      <View
+                        style={{
+                          width: "30%",
+                          aspectRatio: 1,
+                          marginBottom: 10,
+                          marginRight: (index + 1) % 3 === 0 ? 0 : 18,
+                        }}
+                      >
+                        <TouchableOpacity
+                          style={{
+                            position: "absolute",
+                            top: 5,
+                            right: 5,
+                            zIndex: 10,
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            borderRadius: 12,
+                            padding: 2,
+                          }}
+                          onPress={() =>
+                            setUploadedFiles((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            )
+                          }
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={18}
+                            color="#fff"
+                          />
+                        </TouchableOpacity>
+
+                        <Image
+                          source={{ uri: item.uri }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 10,
+                            backgroundColor: "#ccc",
+                            borderWidth: 1,
+                          }}
+                          resizeMode="cover"
                         />
                       </View>
                     )}
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text
-                  style={{ color: "#666", textAlign: "center", width: "100%" }}
-                >
-                  No files uploaded
-                </Text>
-              )}
-            </View>
-          </>
-        ) : (
-          <>
-            <Text
-              style={[
-                styles.assignedText,
-                { fontSize: 15, fontWeight: "bold" },
-              ]}
-            >
-              Deadline:
-            </Text>
-            <View style={styles.row}>
-              <View style={styles.deadlineBox}>
-                <Ionicons name="calendar-outline" size={18} color="#555" />
-                <Text style={styles.deadlineText}>{taskData?.find((task) => task.ID == task_id)?.task_deadline || "loading..."}</Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              onPress={handle_openComment}
-              style={{
-                justifyContent: "flex-start",
-                alignItems: "center",
-                flexDirection: "row",
-              }}
-            >
-              <Ionicons
-                name="chatbox-ellipses-outline"
-                color={"blue"}
-                size={22}
-              />
-              <Text style={styles.commentDesign}> Comments</Text>
-            </TouchableOpacity>
-
-            <LinearGradient
-              colors={["#c75e5eff", "#dd0b0bff"]}
-              style={styles.statusCard}
-            >
-              <Text style={styles.notAssigned}>Not assigned</Text>
-            </LinearGradient>
-
-            <View style={styles.descriptionBox}>
-              <Text style={styles.descriptionHeader}>Description</Text>
-              <Text style={styles.descriptionText}>
-                {taskData?.find((task) => task.ID == task_id)
-                  ?.task_description || "No description"}
-              </Text>
-            </View>
-          </>
-        )}
-
-        {/* Slide Up Modal */}
-        <Modal
-          animationType="slide"
-          visible={modalVisible}
-          transparent={true}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <TouchableOpacity
-                style={styles.closeBtn}
-                onPress={() => setModalVisible(false)}
-              >
-                <Ionicons name="close-circle" size={25} color="#c40000ff" />
-              </TouchableOpacity>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text style={styles.modalTitle}>To be Uploaded</Text>
-
-                <TouchableOpacity style={styles.addFileBtn} onPress={pickFile}>
-                  <Ionicons
-                    name="cloud-upload-outline"
-                    size={24}
-                    color="black"
+                    ListEmptyComponent={
+                      <Text
+                        style={{
+                          color: "#666",
+                          textAlign: "center",
+                          width: "100%",
+                        }}
+                      >
+                        No files uploaded
+                      </Text>
+                    }
                   />
-                  <Text> Upload File</Text>
-                </TouchableOpacity>
-              </View>
 
-              <FlatList
-                data={uploadedFiles}
-                numColumns={3}
-                keyExtractor={(item, index) => index.toString()}
-                columnWrapperStyle={{ justifyContent: "space-between" }}
-                renderItem={({ item, index }) => (
-                  <View
-                    style={{ width: "30%", aspectRatio: 1, marginBottom: 10 }}
-                  >
-                    <TouchableOpacity
-                      style={{
-                        position: "absolute",
-                        top: 5,
-                        right: 5,
-                        zIndex: 10,
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        borderRadius: 12,
-                        padding: 2,
-                      }}
-                      onPress={() =>
-                        setUploadedFiles((prev) =>
-                          prev.filter((_, i) => i !== index)
-                        )
-                      }
-                    >
-                      <Ionicons name="trash-outline" size={18} color="#fff" />
-                    </TouchableOpacity>
-
-                    <Image
-                      source={{ uri: item.uri }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 10,
-                        backgroundColor: "#ccc",
-                        borderWidth:1,
-                      }}
-                      resizeMode="cover"
-                    />
-                  </View>
-                )}
-                ListEmptyComponent={
-                  <Text
-                    style={{
-                      color: "#666",
-                      textAlign: "center",
-                      width: "100%",
+                  <TouchableOpacity
+                    style={styles.done_btn}
+                    onPress={() => {
+                      setModalVisible(false);
+                      uploadFilesToServer(uploadedFiles);
                     }}
                   >
-                    No files uploaded
-                  </Text>
-                }
-              />
+                    <Text style={{ color: "white", fontWeight: "bold" }}>
+                      Upload Files
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
 
-              <TouchableOpacity
-                style={styles.done_btn}
-                onPress={() => {
-                  setModalVisible(false);
-                  uploadFilesToServer(uploadedFiles);
+            {isLoading && (
+              <Modal transparent={true} animationType="fade">
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 120,
+                      height: 120,
+                      backgroundColor: "#fff",
+                      borderRadius: 20,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      shadowColor: "#000",
+                      shadowOpacity: 0.25,
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowRadius: 8,
+                      elevation: 8,
+                    }}
+                  >
+                    <ActivityIndicator size="large" color="#4a3aff" />
+                    <Text
+                      style={{
+                        marginTop: 12,
+                        fontSize: 15,
+                        fontWeight: "600",
+                        color: "#333",
+                      }}
+                    >
+                      Loading...
+                    </Text>
+                  </View>
+                </View>
+              </Modal>
+            )}
+
+            {/* expand image */}
+            <Modal
+              visible={imageModalVisible}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setImageModalVisible(false)}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "rgba(0,0,0,0.9)",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  Upload Files
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+                <TouchableOpacity
+                  style={{ position: "absolute", top: 40, right: 20 }}
+                  onPress={() => setImageModalVisible(false)}
+                >
+                  <Ionicons name="close-circle" size={35} color="#fff" />
+                </TouchableOpacity>
 
-        {isLoading && (
-          <Modal>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <ActivityIndicator size="large" color="#332277" />
-            </View>
-          </Modal>
-        )}
-
-        {/* expand image */}
-        <Modal
-          visible={imageModalVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setImageModalVisible(false)}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(0,0,0,0.9)",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+                {selectedImageUri && (
+                  <Image
+                    source={{ uri: selectedImageUri }}
+                    style={{
+                      width: "90%",
+                      height: "70%",
+                      borderRadius: 12,
+                    }}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+            </Modal>
+          </ScrollView>
+        </>
+      ) : (
+        <View style={styles.taskRemovedContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color="#ff4d4d" />
+          <Text style={styles.taskRemovedTitle}>Task Removed</Text>
+          <Text style={styles.taskRemovedMessage}>
+            This task is no longer available. It may have been removed by the administrator or project manager.
+          </Text>
+          <TouchableOpacity
+            style={styles.taskRemovedBtn}
+            onPress={() => router.back()}
           >
-            <TouchableOpacity
-              style={{ position: "absolute", top: 40, right: 20 }}
-              onPress={() => setImageModalVisible(false)}
-            >
-              <Ionicons name="close-circle" size={35} color="#fff" />
-            </TouchableOpacity>
-
-            {selectedImageUri && (
-              <Image
-                source={{ uri: selectedImageUri }}
-                style={{
-                  width: "90%",
-                  height: "70%",
-                  borderRadius: 12,
-                }}
-                resizeMode="contain"
-              />
-            )}
-          </View>
-        </Modal>
-      </ScrollView>
+            <Ionicons name="arrow-back" size={18} color="#fff" />
+            <Text style={styles.taskRemovedBtnText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Bottom Work Area */}
       {taskData &&
@@ -782,5 +896,40 @@ const styles = StyleSheet.create({
     color: "blue",
     marginVertical: 10,
     fontSize: 17,
+  },
+  taskRemovedContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+    paddingBottom: 100,
+  },
+  taskRemovedTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#ff4d4d",
+    marginTop: 10,
+  },
+  taskRemovedMessage: {
+    textAlign: "center",
+    color: "#666",
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  taskRemovedBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ff4d4d",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    marginTop: 25,
+  },
+  taskRemovedBtnText: {
+    color: "#fff",
+    fontWeight: "600",
+    marginLeft: 6,
+    fontSize: 15,
   },
 });
