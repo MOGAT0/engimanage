@@ -32,7 +32,7 @@ const Overall_dashboard = () => {
         No project has completed a task yet
       </Text>
       <Text style={{ fontSize: 13, color: "#c33f3fff", marginTop: 10 }}>
-        (reload for upadates)
+        (Please reload for new update)
       </Text>
     </View>
   );
