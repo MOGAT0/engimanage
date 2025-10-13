@@ -26,7 +26,7 @@ const Overall_dashboard = () => {
 
   const NoProjects = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="briefcase-outline" size={64} color="#aaa" />
+      <Ionicons name="briefcase-outline" size={64} color="#444444ff" />
       <Text style={styles.emptyTitle}>No Productive Projects</Text>
       <Text style={styles.emptyMessage}>
         No project has completed a task yet
