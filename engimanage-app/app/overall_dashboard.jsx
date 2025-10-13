@@ -31,7 +31,7 @@ const Overall_dashboard = () => {
       <Text style={styles.emptyMessage}>
         No project has completed a task yet
       </Text>
-      <Text style={{ fontSize: 13, color: "#f11a1aff", marginTop: 10 }}>
+      <Text style={{ fontSize: 13, color: "#f1531aff", marginTop: 10 }}>
         (Please reload for new update)
       </Text>
     </View>
