@@ -5,7 +5,7 @@ import globalScript from "./globals/globalScript";
 import CustomHeader from "./components/customHeader";
 import { useLocalSearchParams } from "expo-router";
 import { router } from "expo-router";
-
+import { EventSource } from "react-native-sse";
 import Request from "./components/request";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,7 +16,7 @@ const Notif = ({ projectID, homeRoute, userType }) => {
   const [notif, setNotif] = useState([]);
   const [employeeID, setEmployeeID] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async () => {    
     try {
       const securedata = await DataSecureStorage.getItem(
         userType === "admin" ? "adminLoginData" : "loginData"
@@ -50,13 +50,47 @@ const Notif = ({ projectID, homeRoute, userType }) => {
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData();
-    }, 1000);
+    let sse;
 
-    return () => clearInterval(interval);
+    const init = async () => {
+      await fetchData(); // initial load
+
+      const securedata = await DataSecureStorage.getItem(
+        userType === "admin" ? "adminLoginData" : "loginData"
+      );
+      const userData = JSON.parse(securedata);
+      const empID = userData.ID;
+
+      // connect to SSE stream
+      sse = new EventSource(`${link.api_link}/subscribe_notif?empID=${empID}`);
+
+      sse.addEventListener("message", (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("Received new notification:", data);
+
+          // instantly show new notif
+          setNotif((prev) => [data, ...prev]);
+          console.log("shit");
+        } catch (err) {
+          console.log("SSE parse error:", err);
+        }
+      });
+
+      sse.addEventListener("error", (err) => {
+        console.log("SSE connection error:", err);
+      });
+    };
+
+    
+
+    init();
+
+    return () => {
+      if (sse) sse.close();
+    };
   }, []);
+
 
   const handleAccept = async (notif_id) => {
     try {
@@ -205,7 +239,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#f9f9f9",
+    paddingTop:25,
+    backgroundColor: "#fff",
   },
   notif_alert: {
     flexDirection: "row",

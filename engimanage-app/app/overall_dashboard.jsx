@@ -175,12 +175,14 @@ const Overall_dashboard = () => {
   };
 
   useEffect(() => {
-    getUserInfo();
+    if(!userinfo){
+      getUserInfo();
+    }
     get_taks_info();
     if (userinfo) {
       fetch_ranking_info();
     }
-  }, []);
+  }, [userinfo]);
 
   // useEffect(()=>{
   //   if(projects.length === 0){
@@ -197,6 +199,8 @@ const Overall_dashboard = () => {
     if (data) {
       const info = JSON.parse(data);
       setUserinfo(info);
+      console.log(info);
+      
     }
   };
 

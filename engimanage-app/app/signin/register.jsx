@@ -14,6 +14,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 import CustomHeader from "../components/customHeader";
 import globalScript from "../globals/globalScript";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const link = globalScript;
 const API_LINK = `${link.api_link}/register`;
@@ -68,7 +69,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <Container
         position="top"
         style={{ width: "fit_content", overflow: "hidden" }}
@@ -139,7 +140,7 @@ export default function RegisterScreen() {
           </Text> */}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 

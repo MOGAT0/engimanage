@@ -810,6 +810,7 @@ export default ManagementPage;
 const styles = StyleSheet.create({
   container: {
     padding: 10,
+    paddingTop:25,
     backgroundColor: "#fff",
     flex: 1,
   },

@@ -44,12 +44,20 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
   const [folderCnt, setFolderCnt] = useState(0);
 
   useEffect(() => {
-    fetchFiles(currentPath);
-
-    if (projectInfo === null && projectInfo !== undefined) {
+    if (!projectInfo) {
       get_projectinfo();
+      return;
+    }
+    if (
+      projectInfo.length > 0 &&
+      projectInfo[0].file_path &&
+      projectInfo[0].file_path.trim() !== "" &&
+      currentPath !== null
+    ) {
+      fetchFiles(currentPath);
     }
   }, [currentPath, projectInfo]);
+
 
   const get_projectinfo = async ()=>{
     const response = await fetch(`${link.api_link}/getprojectinfo`,{
@@ -61,7 +69,10 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
     })
 
     const data = await response.json();
-
+    console.log("------+--------");
+    console.log(data.result);
+    console.log("------+--------");
+    
     if(data.ok){
       setProjectInfo(data.result)
     } else{
@@ -70,7 +81,7 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
     }
   }
 
-  const fetchFiles = async (path = "") => {    
+  const fetchFiles = async (path) => {    
     try {
       setLoading(true);
       const res = await fetch(
@@ -279,7 +290,7 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
   return (
     <View style={styles.container}>
       <CustomHeader
-        title="Project Files"
+        title={`Project Files${(projectInfo && projectInfo[0]?.file_path !== "") ? " (private)" : " (No File)"}`}
         routePath={homeRoute}
         backName="Home"
       />
@@ -441,12 +452,14 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
                       style: "destructive",
                       onPress: async () => {
                         try {
+                          console.log(selectedItem);
+                          
                           const res = await fetch(
                             `${link.api_link}/delete_item`,
                             {
                               method: "DELETE",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ path: selectedItem.path }),
+                              body: JSON.stringify({ path: selectedItem.url }),
                             }
                           );
                           const data = await res.json();
@@ -543,7 +556,7 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
-                        sourcePath: copiedItem.path,
+                        sourcePath: copiedItem.url,
                         destinationPath: currentPath || "/",
                       }),
                     });
@@ -577,11 +590,12 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
                 onPress={async () => {
                   setModalVisible(false);
                   try {
+                    
                     const res = await fetch(`${link.api_link}/move_item`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
-                        sourcePath: cutItem.path,
+                        sourcePath: cutItem.url,
                         destinationPath: currentPath || "/",
                       }),
                     });
@@ -670,7 +684,7 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
-                        oldPath: selectedItem.path,
+                        oldPath: selectedItem.url,
                         newName: renameInput.trim(),
                       }),
                     });
@@ -715,6 +729,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    paddingTop:25,
     backgroundColor: "#fff",
   },
   folderItem: {

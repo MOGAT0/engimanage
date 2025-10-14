@@ -9,11 +9,12 @@ import {
   Platform,
   FlatList,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import CustomHeader from "../components/customHeader";
 import DataSecureStorage from "../components/DataSecureStorage";
+import EventSource from "react-native-sse";
 
 import globalScript from "../globals/globalScript";
 const link = globalScript;
@@ -26,6 +27,15 @@ const TaskComments = () => {
   const [task, setTask] = useState(null);
   const [commentData, setCommentData] = useState([]);
   const [userInfo, setUserInfo] = useState([]);
+
+  const flatListRef = useRef(null); 
+
+  useEffect(() => {
+    if (flatListRef.current && commentData.length > 0) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [commentData]);
+
 
   useEffect(() => {
     getuserInfo();
@@ -81,8 +91,29 @@ const TaskComments = () => {
 
   // Fetch comments when task is ready
   useEffect(() => {
-    if (task) fetch_comments();
+    if (!task) return;
+
+    fetch_comments();
+
+    // establish SSE connection
+    const sse = new EventSource(`${link.api_link}/comment-stream/${task.ID}`);
+
+    sse.addEventListener("message", (event) => {
+      const newComment = JSON.parse(event.data);
+      console.log("New comment received:", newComment);
+      // setCommentData((prev) => [...prev, newComment]);
+      fetch_comments();
+    });
+
+    sse.addEventListener("error", (err) => {
+      console.error("SSE error:", err);
+    });
+
+    return () => {
+      sse.close();
+    };
   }, [task]);
+
 
   const fetch_comments = async () => {
     try {
@@ -125,13 +156,15 @@ const TaskComments = () => {
 
       {/* Render comments */}
       <FlatList
+        ref={flatListRef}
         data={commentData}
         keyExtractor={(item) => item.commentID.toString()}
         renderItem={({ item }) => (
           <View style={styles.commentBox}>
             <Text style={{ fontWeight: "bold",alignSelf: userInfo.ID === item.user_ID ? "flex-end" : "flex-start" }}>
-              {item.employee_name.replace(/_/g, " ") || "Anonymous"}
+              {item?.employee_name?.replace(/_/g, " ") || "Anonymous"}
             </Text>
+
             {/* {
                   backgroundColor:
                     userInfo.ID === item.user_ID ? "#ffb055ff" : "#0cbc7fff",

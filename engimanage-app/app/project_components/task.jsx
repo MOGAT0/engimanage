@@ -878,7 +878,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#f9f9f9",
+    paddingTop:25,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 26,
@@ -909,11 +910,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
     marginBottom: 12,
-    elevation: 3,
+    elevation: 10,
     shadowColor: "#aaa",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    borderWidth:1,
+    borderColor:"#c2c2c2"
   },
   label: {
     fontSize: 18,
