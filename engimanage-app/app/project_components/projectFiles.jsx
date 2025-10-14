@@ -19,9 +19,9 @@ import * as IntentLauncher from "expo-intent-launcher";
 import * as DocumentPicker from "expo-document-picker";
 import { Platform } from "react-native";
 import CustomHeader from "../components/customHeader";
-import prompt from "react-native-prompt-android";
 
 const link = globalScript;
+const default_path = "https://ejwoogqqwgkiipxosarv.supabase.co/storage/v1/object/public/EngiManage-Storage/project_files/project_134_1760443095792"
 
 const ProjectFiles = ({ projectID, homeRoute, userType }) => {
   const [items, setItems] = useState([]);
@@ -34,26 +34,57 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
   const [fileLoading, setFileLoading] = useState(false);
   const [optionModalVisible, setOptionModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [projectInfo, setProjectInfo] = useState(null);
 
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [renameInput, setRenameInput] = useState("");
   const [copiedItem, setCopiedItem] = useState(null);
   const [cutItem, setCutItem] = useState(null);
 
+  const [folderCnt, setFolderCnt] = useState(0);
+
   useEffect(() => {
     fetchFiles(currentPath);
-  }, [currentPath]);
 
-  const fetchFiles = async (path = "") => {
+    if (projectInfo === null && projectInfo !== undefined) {
+      get_projectinfo();
+    }
+  }, [currentPath, projectInfo]);
+
+  const get_projectinfo = async ()=>{
+    const response = await fetch(`${link.api_link}/getprojectinfo`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({projectID})
+    })
+
+    const data = await response.json();
+
+    if(data.ok){
+      setProjectInfo(data.result)
+    } else{
+      console.log(data.message);
+      
+    }
+  }
+
+  const fetchFiles = async (path = "") => {    
     try {
       setLoading(true);
       const res = await fetch(
         `${link.api_link}/files${
-          path ? `?path=${encodeURIComponent(path)}` : ""
+          path ? `?path=${projectInfo[0].file_path}${path}` : `?path=${projectInfo[0].file_path}`
         }`
       );
+
+      console.log(`?path=${projectInfo[0].file_path}`);
+      
+
       const data = await res.json();
       setItems(data);
+      
     } catch (err) {
       console.log("Error fetching files:", err);
     } finally {
@@ -61,16 +92,33 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
     }
   };
 
-  const openFolder = (folder) => {
-    setPathHistory([...pathHistory, currentPath]);
-    setCurrentPath(folder.path);
+  const createPrivateFolder = async () => {
+    const res = await fetch(`${link.api_link}/create-private-folder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectID }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      Alert.alert("Success", "Private folder created!");
+      get_projectinfo(); // refresh project info
+    } else {
+      Alert.alert("Error", data.message);
+    }
   };
 
+
+  const openFolder = (folder) => {
+    setPathHistory([...pathHistory, currentPath]);
+    setCurrentPath(folder.url.replace(`${default_path}${folderCnt === 0 ? "//" : "/"}`,""));    
+  };
+  
   const openFile = async (fileUrl) => {
+    console.log("files");
     try {
       setFileLoading(true);
       // Build encoded URL
-      const encodedUrl = encodeURI(`${link.serverLink}/projectfiles${fileUrl}`);
+      const encodedUrl = encodeURI(`${fileUrl}`);
       console.log("Downloading from:", encodedUrl);
 
       // Extract file name
@@ -93,7 +141,6 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
           flags: 1,
         });
       } else {
-        // On iOS, Linking can handle it
         await Linking.openURL(uri);
       }
     } catch (error) {
@@ -107,16 +154,17 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
     const prevPath = pathHistory[pathHistory.length - 1] || "";
     setPathHistory(pathHistory.slice(0, -1));
     setCurrentPath(prevPath);
+    setFolderCnt(folderCnt-1)
   };
 
   const saveFolder = async () => {
     if (newFolderName.trim() === "") return;
-
+    
     try {
       const res = await fetch(`${link.api_link}/create-folder`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: currentPath, name: newFolderName }),
+        body: JSON.stringify({ path: currentPath ? `${projectInfo[0].file_path}//${currentPath}` : projectInfo[0].file_path , name: newFolderName }),
       });
 
       const data = await res.json();
@@ -204,10 +252,34 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
     }
   };
 
+  const No_main_filepath = () => {
+    return (
+      projectInfo &&
+      projectInfo[0].file_path === "" && (
+        <TouchableOpacity
+          onPress={createPrivateFolder}
+          style={{ backgroundColor: "green", padding: 15, borderRadius: 10 }}
+        >
+          <Text
+            style={{
+              color: "white",
+              fontWeight: "bold",
+              fontSize: 18,
+              textAlign: "center",
+            }}
+          >
+            + Create Folder
+          </Text>
+        </TouchableOpacity>
+      )
+    );
+  };
+
+
   return (
     <View style={styles.container}>
       <CustomHeader
-        title="Project Files (Public)"
+        title="Project Files"
         routePath={homeRoute}
         backName="Home"
       />
@@ -224,19 +296,20 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
           </TouchableOpacity>
         </View>
       )}
-
       {/* Folder/File List */}
       {loading ? (
         <ActivityIndicator size="large" color="#331177" />
       ) : (
+        items.files ? (
         <FlatList
-          data={items}
+          data={items.files}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.folderItem}
               onPress={() => {
-                item.type === "folder" ? openFolder(item) : openFile(item.url);
+                item.metadata ? openFile(item.url) : openFolder(item);
+                setFolderCnt(folderCnt+1)
                 // : router.navigate({ // open file
                 //     pathname: "project_components/filePage",
                 //     params: { fileUrl: item.url },
@@ -249,17 +322,17 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
             >
               <Ionicons
                 name={
-                  item.type === "folder"
+                  item.metadata === null
                     ? "folder"
-                    : item.type === "image"
+                    : item.metadata.mimetype?.startsWith("image/")
                     ? "image-outline"
                     : "document-text"
                 }
                 size={28}
                 color={
-                  item.type === "folder"
+                  item.metadata === null
                     ? "#FFD700"
-                    : item.type === "image"
+                    : item.metadata.mimetype?.startsWith("image/")
                     ? "#c02c2cff"
                     : "#5037cdff"
                 }
@@ -270,6 +343,9 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
             </TouchableOpacity>
           )}
         />
+        ) : (
+          <No_main_filepath/>
+        )
       )}
       {fileLoading && (
         <View style={styles.fileLoadingOverlay}>
@@ -414,12 +490,14 @@ const ProjectFiles = ({ projectID, homeRoute, userType }) => {
       </Modal>
 
       {/* Floating Add Button */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+      {(projectInfo && projectInfo[0].file_path !== "") && (
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
 
       {/* Action Modal */}
       <Modal visible={modalVisible} transparent animationType="fade">

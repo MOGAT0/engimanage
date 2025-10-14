@@ -1,30 +1,16 @@
 [
   {
-    "ID": 92,
-    "assign_status": "assigned",
-    "completion_date": "2025-09-22",
-    "completion_status": "completed",
-    "completion_time": "09:31:49.563869",
-    "employeeID": 36,
-    "employee_name": "Estes Esteban",
-    "label": "Order materials ",
-    "progress": 100,
-    "projectID": 120,
-    "task_deadline": "2025-09-30",
-    "task_description": "Nails 538-02 Plywood 554_98"
-  },
-  {
-    "ID": 92,
-    "assign_status": "assigned",
-    "completion_date": "2025-09-22",
-    "completion_status": "completed",
-    "completion_time": "09:31:49.563869",
-    "employeeID": 45,
-    "employee_name": "admin account",
-    "label": "Order materials ",
-    "progress": 100,
-    "projectID": 120,
-    "task_deadline": "2025-09-30",
-    "task_description": "Nails 538-02 Plywood 554_98"
+    "ID": 134,
+    "projectName": "Smart irrigation system",
+    "desc": "Design and implement an automated irrigation system ",
+    "projectManager": "Pearl",
+    "PM_ID": 56,
+    "budget": 0,
+    "members": "[58,56,59,55]",
+    "file_path": "project_files/project_134_1760443095792/",
+    "status": "pending",
+    "deadline": "2025-10-08T23:14:16.015Z",
+    "pin": "94428",
+    "is_active": 0
   }
 ]
