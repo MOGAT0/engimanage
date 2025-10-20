@@ -234,7 +234,7 @@ const Profile = () => {
             <View style={{ flex: 1 }}>
               {imageLoading && (
                 <View style={styles.loadingOverlay}>
-                  <ActivityIndicator size="large" color="#11a44eff" />
+                  <ActivityIndicator size="large" color="#27aa5eff" />
                 </View>
               )}
               <Image
