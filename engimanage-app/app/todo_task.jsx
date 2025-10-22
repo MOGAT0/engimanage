@@ -20,9 +20,9 @@ const Todo_task = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [employeeID, setEmployeeID] = useState(null);
-  const [filter, setFilter] = useState("Assigned"); // "Assigned" | "Completed"
+  const [filter, setFilter] = useState("Assigned");
 
-  // ✅ Fetch employee info once
+  // Fetch employee info once
   useEffect(() => {
     const getUserInfo = async () => {
       const data = await DataSecureStorage.getItem("loginData");
@@ -34,12 +34,9 @@ const Todo_task = () => {
     getUserInfo();
   }, []);
 
-  // ✅ Task fetching function
+  // Task fetching function
   const handle_getTodotask = useCallback(async () => {
     if (!employeeID) return;
-
-    console.log("todo task");
-    
 
     try {
       if (!refreshing) setLoading(true);
@@ -62,14 +59,14 @@ const Todo_task = () => {
     }
   }, [employeeID, refreshing]);
 
-  // ✅ Fetch tasks once employeeID is available
+  // Fetch tasks once employeeID is available
   useEffect(() => {
     if (employeeID) {
       handle_getTodotask();
     }
   }, [employeeID, handle_getTodotask]);
 
-  // ✅ Pull-to-refresh
+  // Pull-to-refresh
   const onRefresh = () => {
     setRefreshing(true);
     handle_getTodotask();

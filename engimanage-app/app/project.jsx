@@ -601,7 +601,7 @@ const Project = () => {
         <Dialog.Input
           value={projectName}
           onChangeText={setProjectName}
-          placeholder="Enter project name"
+          placeholder="Enter Project name"
           style={{ color: "black" }}
         />
 

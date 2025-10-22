@@ -8,6 +8,7 @@ import {
   Modal,
   ScrollView,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -15,9 +16,9 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import { ActivityIndicator } from "react-native";
 
-import DataSecureStorage from "../components/DataSecureStorage";
-import globalScript from "../globals/globalScript";
-import CustomHeader from "../components/customHeader";
+import DataSecureStorage from "../../components/DataSecureStorage";
+import globalScript from "../../globals/globalScript";
+import CustomHeader from "../../components/customHeader";
 
 const link = globalScript;
 
@@ -47,7 +48,7 @@ const ProjectCard = ({ project, onPress }) => {
   );
 };
 
-const projectManagement = () => {
+const Active_projects = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -72,6 +73,12 @@ const projectManagement = () => {
     getProjectManagers();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getProjects();
+    setRefreshing(false);
+  };
+
   const getUserInfo = async () => {
     const data = await DataSecureStorage.getItem("adminLoginData");
     if (data) {
@@ -84,7 +91,7 @@ const projectManagement = () => {
     // console.log(projectID);
 
     try {
-      setIsClickedLoading(true);
+      setIsClickedLoading(true)
       const reqBody = {
         userID: userInfo.ID,
         projectID,
@@ -109,8 +116,8 @@ const projectManagement = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsClickedLoading(false);
+    } finally{
+      setIsClickedLoading(false)
     }
   };
 
@@ -132,8 +139,8 @@ const projectManagement = () => {
     }
   };
 
-  const getProjects = async (isReload = false) => {
-    if (!isReload) setLoading(true);
+  const getProjects = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`${link.api_link}/getprojects_adminflag`, {
         method: "POST",
@@ -141,12 +148,17 @@ const projectManagement = () => {
         body: JSON.stringify({}),
       });
       const data = await response.json();
-      if (data.ok) setProjects(data.projects);
+
+      if (data.ok) {
+        const activeProjects = data.projects.filter(
+          (project) => project.is_active === 0
+        );
+        setProjects(activeProjects);
+      }
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -186,7 +198,7 @@ const projectManagement = () => {
   return (
     <View style={styles.container}>
       <CustomHeader
-        title={"All Projects"}
+        title={"Active Projects"}
         bg_color={"#393E46"}
         text_color={"white"}
       />
@@ -220,40 +232,49 @@ const projectManagement = () => {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFD369" />
+          <ActivityIndicator size="large" color="#00ADB5" />
           {/* <Text style={styles.loadingText}>Loading projects...</Text> */}
+          <TouchableOpacity
+            style={styles.reloadButton}
+            onPress={() => getProjects()}
+          >
+            {/* <Ionicons name="reload" size={18} color="#fff" />
+            <Text style={styles.reloadText}>Reload</Text> */}
+          </TouchableOpacity>
         </View>
       ) : (
-        <>
-          <FlatList
-            data={filteredProjects.length ? filteredProjects : projects}
-            keyExtractor={(item) => item.ID.toString()}
-            renderItem={({ item }) => (
-              <ProjectCard
-                project={item}
-                onPress={() => handleProjectClick(item.ID)}
-              />
-            )}
-            showsVerticalScrollIndicator={false}
-            refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              getProjects(true);
-            }}
-            ListEmptyComponent={
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No projects found</Text>
-                <TouchableOpacity
-                  style={styles.reloadButton}
-                  onPress={() => getProjects(true)}
-                >
-                  <Ionicons name="reload" size={20} color="#fff" />
-                  <Text style={{ color: "#fff", marginLeft: 8 }}>Reload</Text>
-                </TouchableOpacity>
-              </View>
-            }
-          />
-        </>
+        <FlatList
+          data={filteredProjects.length ? filteredProjects : projects}
+          keyExtractor={(item) => item.ID.toString()}
+          renderItem={({ item }) => (
+            <ProjectCard
+              project={item}
+              onPress={() => handleProjectClick(item.ID)}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#00ADB5"
+              colors={["#00ADB5"]}
+              progressBackgroundColor="#1a1d23"
+            />
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No projects found</Text>
+              <TouchableOpacity
+                style={styles.reloadButton}
+                onPress={() => getProjects()}
+              >
+                <Ionicons name="reload" size={18} color="#fff" />
+                <Text style={styles.reloadText}>Reload</Text>
+              </TouchableOpacity>
+            </View>
+          }
+        />
       )}
 
       {/* CREATE PROJECT MODAL */}
@@ -378,23 +399,24 @@ const projectManagement = () => {
         </Modal>
       )}
 
+
     </View>
   );
 };
 
-export default projectManagement;
+export default Active_projects;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#393E46",
+    backgroundColor: "#393E46", // darker modern tone
     padding: 16,
     paddingTop: 30,
   },
   header: {
     fontSize: 25,
     fontWeight: "bold",
-    color: "#EEEEEE",
+    color: "#EAEAEA",
     marginBottom: 20,
     marginTop: 25,
   },
@@ -402,93 +424,134 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#222831",
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    marginBottom: 16,
-    paddingVertical: 6,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    marginBottom: 18,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#2C2C2C",
   },
-  searchInput: { flex: 1, fontSize: 14, color: "#EEEEEE" },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: "#FFFFFF",
+  },
   card: {
     backgroundColor: "#222831",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 12,
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: "#444",
+    borderColor: "#2E2E2E",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
   },
-  projectName: { fontSize: 18, fontWeight: "bold", color: "#FFD369" },
-  projectDesc: { fontSize: 14, color: "#EEEEEE", marginBottom: 8 },
-  memberRow: { flexDirection: "row", alignItems: "center" },
-  memberCount: { marginLeft: 5, fontSize: 14, color: "#AAAAAA" },
+  projectName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1ac966ff",
+    marginBottom: 6,
+  },
+  projectDesc: {
+    fontSize: 14,
+    color: "#CCCCCC",
+    marginBottom: 10,
+    lineHeight: 18,
+  },
+  memberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  memberCount: {
+    marginLeft: 6,
+    fontSize: 13,
+    color: "#AAAAAA",
+  },
   createBTN: {
     position: "absolute",
     top: 40,
     right: 15,
     backgroundColor: "#00ADB5",
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    elevation: 3,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.85)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContainer: {
-    width: "90%",
-    backgroundColor: "#222831",
-    borderRadius: 10,
+    width: "92%",
+    backgroundColor: "#181818",
+    borderRadius: 14,
     padding: 20,
+    borderWidth: 1,
+    borderColor: "#333",
   },
   modalTitle: {
-    color: "#FFD369",
+    color: "#00E0FF",
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "700",
     marginBottom: 15,
+    textAlign: "center",
   },
   input: {
-    backgroundColor: "#393E46",
+    backgroundColor: "#222",
     color: "#fff",
-    borderRadius: 8,
-    padding: 10,
+    borderRadius: 10,
+    padding: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#333",
   },
   dropdown: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#393E46",
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: "#222",
+    padding: 12,
+    borderRadius: 10,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#333",
   },
   dropdownList: {
-    backgroundColor: "#393E46",
-    borderRadius: 8,
+    backgroundColor: "#222831",
+    borderRadius: 10,
     marginBottom: 10,
-    maxHeight: 150,
+    maxHeight: 160,
+    borderWidth: 1,
+    borderColor: "#2C2C2C",
   },
   dropdownItem: {
-    padding: 10,
+    padding: 12,
     borderBottomWidth: 1,
-    borderColor: "#444",
+    borderColor: "#333",
   },
   datePickerBtn: {
-    backgroundColor: "#393E46",
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: "#222",
+    padding: 12,
+    borderRadius: 10,
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#333",
   },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 10,
+    marginTop: 12,
   },
   modalBtn: {
     flex: 1,
     alignItems: "center",
-    padding: 10,
+    paddingVertical: 12,
     marginHorizontal: 5,
-    borderRadius: 8,
+    borderRadius: 10,
   },
 });

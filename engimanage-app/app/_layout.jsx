@@ -273,6 +273,23 @@ const RootLayout = () => {
         options={{ headerShown: false, title: "" }}
       />
       <Stack.Screen
+        name="admin/projectManagement"
+        options={{ headerShown: false, title: "" }}
+      />
+      <Stack.Screen
+        name="admin/dashboard_display/active_projects"
+        options={{ headerShown: false, title: "" }}
+      />
+      <Stack.Screen
+        name="admin/dashboard_display/completed_projects"
+        options={{ headerShown: false, title: "" }}
+      />
+      <Stack.Screen
+        name="admin/dashboard_display/total_tasks"
+        options={{ headerShown: false, title: "" }}
+      />
+
+      <Stack.Screen
         name="signin/setting"
         options={{ headerShown: false, title: "" }}
       />

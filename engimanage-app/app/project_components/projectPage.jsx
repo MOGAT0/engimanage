@@ -281,7 +281,7 @@ const DashboardPage = ({projectID,homeRoute,userType}) => {
                 end={{ x: 1, y: 1 }}
                 style={styles.statBox}
               >
-                <Text style={styles.statTitle}>Uncomplete Tasks</Text>
+                <Text style={styles.statTitle}>Incomplete Tasks</Text>
                 <Text style={styles.statValue}>
                   {uncompletedTask_count || 0}
                 </Text>

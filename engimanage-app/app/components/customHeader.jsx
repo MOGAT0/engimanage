@@ -3,7 +3,7 @@ import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-const CustomHeader = ({ title, rightButton, backName = "Back", routePath }) => {
+const CustomHeader = ({ title, rightButton, backName = "Back", routePath, bg_color,text_color }) => {
   const handleBack = () => {
     if (routePath) {
       router.navigate(routePath);
@@ -13,15 +13,15 @@ const CustomHeader = ({ title, rightButton, backName = "Back", routePath }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor:bg_color? bg_color : "#fff"}]}>
       {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-        <Text style={styles.backText}>{backName}</Text>
+        <Ionicons name="chevron-back" size={24} color={text_color ? text_color : "black"} />
+        <Text style={[styles.backText,{color:text_color ? text_color : "black"}]}>{backName}</Text>
       </TouchableOpacity>
 
       {/* Page Title */}
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title,{color:text_color ? text_color : "black"}]}>{title}</Text>
 
       {/* Right Button (optional) */}
       <View style={styles.rightButton}>{rightButton}</View>
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
-    backgroundColor: "#fff",
+    backgroundColor:"#fff",
     marginBottom: 20,
   },
   backButton: {

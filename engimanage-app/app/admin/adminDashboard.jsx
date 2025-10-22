@@ -1,7 +1,17 @@
-import { StyleSheet, Text, View, ScrollView, Dimensions } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
 import { PieChart, BarChart } from "react-native-chart-kit";
 import globalScript from "../globals/globalScript";
+import { router } from "expo-router";
 
 const link = globalScript;
 const screenWidth = Dimensions.get("window").width;
@@ -15,13 +25,14 @@ const getRandomColor = () =>
 const adminDashboard = () => {
   const [projectInfoCounts, setProjectInfoCounts] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [rawProjects, setRawProjects] = useState([]);
 
   const projects = rawProjects.map((p) => ({
     ...p,
     color: getRandomColor(),
   }));
+
   const progressData = {
     labels: projects.map((p) => p.id),
     datasets: [
@@ -31,11 +42,48 @@ const adminDashboard = () => {
     ],
   };
 
-  useEffect(() => {
-    if (loading) {
-      fetch_projectInfoCounts();
-      get_projectGraphInfo();
+  const fetch_projectInfoCounts = async () => {
+    try {
+      const response = await fetch(`${link.api_link}/projectstatus_count`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+      if (data.ok) setProjectInfoCounts(data.result[0]);
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  const get_projectGraphInfo = async () => {
+    try {
+      const response = await fetch(`${link.api_link}/getProjectGraphStatus`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+      if (data.ok) setRawProjects(data.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    await Promise.all([fetch_projectInfoCounts(), get_projectGraphInfo()]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchAllData();
+    setRefreshing(false);
   }, []);
 
   const taskData = [
@@ -69,97 +117,79 @@ const adminDashboard = () => {
     },
   ];
 
-  const fetch_projectInfoCounts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${link.api_link}/projectstatus_count`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-
-      const data = await response.json();
-
-      if (data.ok) {
-        setProjectInfoCounts(data.result[0]);
-      } else {
-        console.log("No Data");
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const get_projectGraphInfo = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${link.api_link}/getProjectGraphStatus`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-
-      const data = await response.json();
-
-      if (data.ok) {
-        console.log(data.result);
-        setRawProjects(data.result);
-      } else {
-        console.log(data.message);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00ADB5"
+            colors={["#00ADB5"]}
+            progressBackgroundColor="#222831"
+          />
+        }
+      >
         <Text style={styles.header}>Admin Dashboard</Text>
 
         {loading ? (
           <View>
-            <Text>Loading...</Text>
+            <Text style={{ color: "#EEEEEE", textAlign: "center" }}>
+              Loading...
+            </Text>
           </View>
         ) : (
           <>
             {/* Overview Cards */}
             <View style={styles.cardRow}>
-              <View style={styles.card}>
+              <TouchableOpacity
+                onPress={() => router.navigate("admin/projectManagement")}
+                style={styles.card}
+              >
                 <Text style={styles.cardTitle}>Total Projects</Text>
                 <Text style={styles.cardValue}>
                   {projectInfoCounts?.total_projects_count || "~"}
                 </Text>
-              </View>
-              <View style={styles.card}>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() =>
+                  router.navigate("admin/dashboard_display/completed_projects")
+                }
+                style={styles.card}
+              >
                 <Text style={styles.cardTitle}>Completed Projects</Text>
                 <Text style={styles.cardValue}>
                   {projectInfoCounts?.completed_projects_count || "~"}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
+
             <View style={styles.cardRow}>
-              <View style={styles.card}>
+              <TouchableOpacity
+                onPress={() =>
+                  router.navigate("admin/dashboard_display/active_projects")
+                }
+                style={styles.card}
+              >
                 <Text style={styles.cardTitle}>Active Projects</Text>
                 <Text style={styles.cardValue}>
                   {projectInfoCounts?.active_projects_count || "~"}
                 </Text>
-              </View>
-              <View style={styles.card}>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() =>
+                  router.navigate("admin/dashboard_display/total_tasks")
+                }
+                style={styles.card}
+              >
                 <Text style={styles.cardTitle}>Total Tasks</Text>
                 <Text style={styles.cardValue}>
                   {projectInfoCounts?.total_task || "~"}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
 
             {/* Pie Chart */}
@@ -175,7 +205,7 @@ const adminDashboard = () => {
               absolute
             />
 
-            {/* Bar Chart with Project IDs */}
+            {/* Bar Chart */}
             <Text style={styles.sectionTitle}>
               Project Progress (Completed Tasks)
             </Text>
@@ -192,7 +222,7 @@ const adminDashboard = () => {
               />
             </ScrollView>
 
-            {/* Legend mapping project IDs -> full names */}
+            {/* Legend */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.legendContainer}>
                 {projects.map((p) => (
@@ -210,20 +240,6 @@ const adminDashboard = () => {
                 ))}
               </View>
             </ScrollView>
-
-            {/* Recent Activity */}
-            {/* <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <View style={styles.listItem}>
-              <Text style={styles.listText}>✔ Task completed by John</Text>
-            </View>
-            <View style={styles.listItem}>
-              <Text style={styles.listText}>
-                ⚠ Project Beta deadline in 3 days
-              </Text>
-            </View>
-            <View style={styles.listItem}>
-              <Text style={styles.listText}>+ New user added: Maria</Text>
-            </View> */}
           </>
         )}
       </ScrollView>
@@ -238,9 +254,7 @@ const chartConfig = {
   backgroundGradientTo: "#393E46",
   color: (opacity = 1) => `rgba(238, 238, 238, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(238, 238, 238, ${opacity})`,
-  style: {
-    borderRadius: 16,
-  },
+  style: { borderRadius: 16 },
 };
 
 const styles = StyleSheet.create({
@@ -286,20 +300,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 8,
   },
-  listItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#222831",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 6,
-  },
-  listText: {
-    color: "#EEEEEE",
-    fontSize: 14,
-  },
-
-  /* Legend styles */
   legendContainer: {
     flexDirection: "row",
     alignItems: "center",

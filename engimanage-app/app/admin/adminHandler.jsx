@@ -87,11 +87,11 @@ const adminHandler = () => {
           options={{ headerShown: false, headerTitle: "",title:"Roles"}}
           component={ManageRole_Page}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="ProjectManagement"
           options={{ headerShown: false, headerTitle: "",title:"Projects" }}
           component={ProjectManagement_Page}
-        />
+        /> */}
         <Tab.Screen
           name="UserControl"
           options={{ headerShown: false, headerTitle: "",title:"Employees" }}

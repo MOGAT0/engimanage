@@ -13,6 +13,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import globalScript from "../globals/globalScript";
+import { ActivityIndicator } from "react-native-paper";
 
 const link = globalScript;
 
@@ -26,22 +27,28 @@ const ManageRoles = () => {
   const [permissionID, setPermissionID] = useState(""); // selected permissionID
   const [note, setNote] = useState("");
   const [expanded, setExpanded] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [permissionKey, setPermissionKey] = useState("view");
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // fetch roles
   const fetchRoles = async () => {
     try {
+      setLoading(true);
       const res = await fetch(`${link.api_link}/getRoles`, { method: "POST" });
       const data = await res.json();
       setRoles(data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   // fetch permissions
   const fetchPermissions = async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${link.api_link}/getPermissions`, {
         method: "POST",
@@ -50,6 +57,8 @@ const ManageRoles = () => {
       setPermissions(data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -559,5 +568,11 @@ const styles = StyleSheet.create({
   permissionTextSelected: {
     fontWeight: "600",
     color: "#00ADB5",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#393E46",
   },
 });
