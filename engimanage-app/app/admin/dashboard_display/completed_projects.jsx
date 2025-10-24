@@ -376,7 +376,7 @@ const completed_projects = () => {
               backgroundColor: "rgba(0,0,0,0.3)",
             }}
           >
-            <ActivityIndicator size="large" color="#fff200ff" />
+            <ActivityIndicator size="large" color="#ebe005ff" />
             <Text style={{color:"white"}}>Opening Project...</Text>
           </View>
         </Modal>
