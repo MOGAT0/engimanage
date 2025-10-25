@@ -9,6 +9,7 @@ import ProjectManagement from "./projectManagement";
 import UserControl from "./userControl";
 import AdminProfile from "./adminProfile";
 import Project from "../project";
+import Overall_dashboard from "../overall_dashboard";
 
 const Dashboard = () => {
   return <AdminDashboard />;
@@ -32,6 +33,10 @@ const Profile = ()=>{
 
 const ProjectList = ()=> {
   return <Project/>;
+}
+
+const OverallDashboard = () => {
+  return <Overall_dashboard/>;
 }
 
 
@@ -65,6 +70,9 @@ const adminHandler = () => {
               iconName = focused ? "person-circle" : "person-circle-outline";
             }
             
+            else if (route.name === "OverallDashboard"){
+              iconName = focused ? "bar-chart" : "bar-chart-outline"
+            }
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
@@ -98,10 +106,17 @@ const adminHandler = () => {
           component={UserControl_Page}
         />
         <Tab.Screen
+          name="OverallDashboard"
+          options={{ headerShown: false, headerTitle: "",title:"Perfornance"}}
+          component={OverallDashboard}
+        />
+        <Tab.Screen
           name="Profile"
           options={{ headerShown: false, headerTitle: "" }}
           component={Profile}
         />
+
+
 
       </Tab.Navigator>
     </>

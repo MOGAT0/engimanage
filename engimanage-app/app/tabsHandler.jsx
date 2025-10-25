@@ -48,7 +48,7 @@ const tabsHandler = () => {
             } else if (route.name === "TodoTasks") {
               iconName = focused ? "clipboard" : "clipboard-outline";
             } else if (route.name === "OverAllDashboard") {
-              iconName = focused ? "trophy" : "trophy-outline";
+              iconName = focused ? "bar-chart" : "bar-chart-outline";
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -61,7 +61,7 @@ const tabsHandler = () => {
         })}
       >
         <Tab.Screen name="Projects" options={{headerTitle:''}} component={ProjectPage} />
-        <Tab.Screen name="OverAllDashboard" options={{headerTitle:'',title:"Ranking"}} component={OverAllDashboard} />
+        <Tab.Screen name="OverAllDashboard" options={{headerTitle:'',title:"Performance"}} component={OverAllDashboard} />
         {/* <Tab.Screen name="Task" options={{headerTitle:''}} component={Tasks} /> */}
         <Tab.Screen name="TodoTasks" options={{headerTitle:'',title:'To-do',}} component={TodoTasks} />
         <Tab.Screen name="Profile" options={{headerTitle:''}} component={ProfilePage} />
