@@ -9,7 +9,7 @@ import ProjectManagement from "./projectManagement";
 import UserControl from "./userControl";
 import AdminProfile from "./adminProfile";
 import Project from "../project";
-import Overall_dashboard from "../overall_dashboard";
+import Performance from "./performance"
 
 const Dashboard = () => {
   return <AdminDashboard />;
@@ -36,7 +36,7 @@ const ProjectList = ()=> {
 }
 
 const OverallDashboard = () => {
-  return <Overall_dashboard/>;
+  return <Performance/>;
 }
 
 

@@ -6,11 +6,15 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  Alert,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, version } from "react";
 
 import globalScript from './globals/globalScript';
+
+import {APP_VERSION} from '@env';
 
 const link = globalScript
 
@@ -20,7 +24,45 @@ const LandingPage = () => {
 
   useEffect(() => {
     router.canGoBack();
+    version_checker();
   }, []);
+
+  const version_checker = async ()=>{
+    try {
+      const response = await fetch (`${link.api_link}/version`,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({app_version:APP_VERSION})
+      });      
+      const data = await response.json();
+
+      console.log(data);
+      
+      if(data.ok && response.status === 200){
+        if (!data.uptodate) {
+          Alert.alert(
+            "Update Available",
+            data.message || "A new version is available!",
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  Linking.openURL(data.link);
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+        }
+      }else{
+        console.log(data.message);  
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <View style={styles.container}>

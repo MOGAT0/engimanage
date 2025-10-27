@@ -52,6 +52,7 @@
     "react-native": "^0.79.5",
     "react-native-chart-kit": "^6.12.0",
     "react-native-dialog": "^9.3.0",
+    "react-native-dotenv": "^3.4.11",
     "react-native-file-viewer": "^2.1.5",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.24.0",
