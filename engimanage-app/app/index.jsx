@@ -67,7 +67,7 @@ const LandingPage = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={{uri:`${link.serverLink}/assets/main.png`}}
+        source={require("../assets/main.png")}
         style={styles.logo}
       />
       <Text style={styles.title}>Welcome</Text>

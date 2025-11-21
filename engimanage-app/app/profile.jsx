@@ -227,7 +227,7 @@ const Profile = () => {
     >
       <ImageBackground
         style={styles.root}
-        source={{ uri: `${link.serverLink}/assets/bg5.png` }}
+        source={require("../assets/bg5.png")}
       >
         <View style={styles.header}>
           <TouchableOpacity style={styles.profileIMG} onPress={pickImage}>

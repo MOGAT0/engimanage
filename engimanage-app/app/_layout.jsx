@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Stack } from "expo-router";
 import { View, AppState } from "react-native";
 import DataSecureStorage from "./components/DataSecureStorage";
-import globalScript from "./globals/randomPin";
+import globalScript from "./globals/globalScript";
 
 
 const RootLayout = () => {
@@ -12,6 +12,7 @@ const RootLayout = () => {
   const link = globalScript;
 
   const updateUserStatus = async (user_status) => {
+    console.log(link.api_link);
     try {
       // console.log(`current status:${user_status}`);
       const userData = await DataSecureStorage.getItem("loginData");
@@ -48,6 +49,8 @@ const RootLayout = () => {
       console.log("Failed to update user status:", error);
     }
   };
+  
+  console.log(isAppActive)
 
   useEffect(() => {
     const handleAppStateChange = (nextAppState) => {
